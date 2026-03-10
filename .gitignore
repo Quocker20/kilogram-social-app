@@ -1,0 +1,28 @@
+# Java (Maven)
+target/
+!.mvn/wrapper/maven-wrapper.jar
+*.class
+*.jar
+*.war
+*.ear
+*.log
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+
+# Python (AI Microservice)
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# Node.js (Frontend)
+node_modules/
+build/
+.DS_Store
+
+# Docker
+.docker/
