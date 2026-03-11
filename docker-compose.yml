@@ -1,0 +1,21 @@
+services:
+  mysql-db:
+    image: mysql:8.0
+    container_name: kilogram-mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: kilogram_db
+      MYSQL_ROOT_PASSWORD: admin
+    ports:
+      - "3306:3306"
+    volumes:
+      - kilogram_db_data:/var/lib/mysql
+    networks:
+      - kilogram-network
+
+networks:
+  kilogram-network:
+    driver: bridge
+
+volumes:
+  kilogram_db_data:
