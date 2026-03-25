@@ -19,3 +19,8 @@ spring:
       hibernate:
         format_sql: true
         dialect: org.hibernate.dialect.MySQLDialect
+
+app:
+  jwt:
+    secret: KilogramSuperSecretKeyForJwtGenerationDoNotShare2026!@#
+    expiration-milliseconds: 86400000
