@@ -83,31 +83,32 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public AuthResponse loginUser(LoginRequest request) {
-        log.info("Processing login request for username: {}", request.getUsername());
+        log.info("Processing login request for user: {}", request.getUsername());
 
-        // 1. Fetch user by username
         User user = userRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> {
-                    log.warn("Login failed: User '{}' not found", request.getUsername());
+                    log.error("Login failed: User '{}' not found", request.getUsername());
                     return new IllegalArgumentException("Invalid username or password");
                 });
 
-        // 2. Verify password
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
             log.warn("Login failed: Incorrect password for user '{}'", request.getUsername());
             throw new IllegalArgumentException("Invalid username or password");
         }
 
-        // 3. Generate JWT Token
-        log.debug("Credentials verified. Generating JWT token for user: {}", request.getUsername());
-        String token = jwtTokenProvider.generateToken(user.getUsername());
+        // If the user logs in successfully but the account is deactivated -> Reactivate it automatically
+        if (!user.isActive()) {
+            log.info("Auto-reactivating account for user: {}", user.getUsername());
+            user.setActive(true);
+            userRepository.save(user);
+        }
 
-        log.info("User '{}' successfully logged in", request.getUsername());
+        String accessToken = jwtTokenProvider.generateToken(user.getUsername());
+        log.info("Login successful for user: {}", request.getUsername());
 
         return AuthResponse.builder()
-                .accessToken(token)
+                .accessToken(accessToken)
                 .build();
     }
 
@@ -168,5 +169,45 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
 
         log.info("Password changed successfully for user: {}", currentUsername);
+    }
+
+    @Override
+    @Transactional
+    public void deactivateAccount(String currentUsername) {
+        log.info("Processing account deactivation for user: {}", currentUsername);
+
+        User user = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> {
+                    log.error("Deactivation failed: User '{}' not found", currentUsername);
+                    return new IllegalArgumentException("User not found");
+                });
+
+        if (!user.isActive()) {
+            log.warn("Account is already deactivated for user: {}", currentUsername);
+            throw new IllegalStateException("Account is already deactivated");
+        }
+
+        user.setActive(false);
+        userRepository.save(user);
+
+        log.info("Account successfully deactivated for user: {}", currentUsername);
+    }
+
+    @Override
+    public java.util.List<UserResponse> searchUsers(String keyword) {
+        log.info("Processing user search with keyword: {}", keyword);
+
+        if (keyword == null || keyword.trim().isEmpty()) {
+            log.debug("Search keyword is empty, returning empty list");
+            return java.util.Collections.emptyList();
+        }
+
+        java.util.List<User> users = userRepository.searchActiveUsersByKeyword(keyword.trim());
+        log.info("Found {} active users matching the keyword", users.size());
+
+        // Convert the list of User entities to a list of UserResponse DTOs
+        return users.stream()
+                .map(this::mapToUserResponse)
+                .collect(java.util.stream.Collectors.toList());
     }
 }

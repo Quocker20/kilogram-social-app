@@ -51,4 +51,19 @@ public interface UserService {
      * @param request containing the old and new passwords
      */
     void changePassword(String currentUsername, ChangePasswordRequest request);
+
+    /**
+     * Deactivates the account of the currently authenticated user.
+     *
+     * @param currentUsername the username extracted from the Security Context
+     */
+    void deactivateAccount(String currentUsername);
+
+    /**
+     * Searches for active users by a keyword matching their username or display name.
+     *
+     * @param keyword the search string
+     * @return list of matching user profiles
+     */
+    java.util.List<UserResponse> searchUsers(String keyword);
 }

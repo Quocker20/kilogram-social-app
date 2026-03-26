@@ -104,4 +104,38 @@ public class UserController {
         // Return a simple success message
         return ResponseEntity.ok("Password updated successfully");
     }
+
+    /**
+     * Deactivates the currently authenticated user's account.
+     *
+     * @param principal the currently logged-in user injected by Spring Security
+     * @return HTTP 200 OK if successful
+     */
+    @PutMapping("/me/deactivate")
+    public ResponseEntity<String> deactivateMyAccount(java.security.Principal principal) {
+        String currentUsername = principal.getName();
+        log.info("REST request to deactivate account for current user: {}", currentUsername);
+
+        userService.deactivateAccount(currentUsername);
+
+        return ResponseEntity.ok("Account deactivated successfully");
+    }
+
+    /**
+     * Searches for active users based on a keyword.
+     * Example: GET /api/users/search?q=john
+     *
+     * @param keyword the search query parameter
+     * @return a list of user profiles matching the keyword
+     */
+    @GetMapping("/search")
+    public ResponseEntity<java.util.List<UserResponse>> searchUsers(
+            @RequestParam(value = "q", defaultValue = "") String keyword) {
+
+        log.info("REST request to search users by keyword: {}", keyword);
+
+        java.util.List<UserResponse> searchResults = userService.searchUsers(keyword);
+
+        return ResponseEntity.ok(searchResults);
+    }
 }
