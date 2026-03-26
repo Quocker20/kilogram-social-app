@@ -1,5 +1,6 @@
 package com.kilogram.backendcore.service.impl;
 
+import com.kilogram.backendcore.dto.request.ChangePasswordRequest;
 import com.kilogram.backendcore.dto.request.UpdateProfileRequest;
 import com.kilogram.backendcore.dto.request.UserRegistrationRequest;
 import com.kilogram.backendcore.dto.request.LoginRequest;
@@ -136,5 +137,36 @@ public class UserServiceImpl implements UserService {
         log.info("Profile updated successfully for user: {}", currentUsername);
 
         return mapToUserResponse(savedUser);
+    }
+
+    @Override
+    @Transactional
+    public void changePassword(String currentUsername, ChangePasswordRequest request) {
+        log.info("Processing password change request for user: {}", currentUsername);
+
+        User user = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> {
+                    log.error("Password change failed: User '{}' not found", currentUsername);
+                    return new IllegalArgumentException("User not found");
+                });
+
+        // Verify the old password
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            log.warn("Password change failed: Incorrect old password provided for user '{}'", currentUsername);
+            throw new IllegalArgumentException("Incorrect current password");
+        }
+
+        // Prevent setting the new password same as the old one (optional but good practice)
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+            log.warn("Password change failed: New password is the same as the old password for user '{}'", currentUsername);
+            throw new IllegalArgumentException("New password cannot be the same as the current password");
+        }
+
+        // Hash and save the new password
+        log.debug("Encoding and saving new password for user {}", currentUsername);
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+
+        log.info("Password changed successfully for user: {}", currentUsername);
     }
 }

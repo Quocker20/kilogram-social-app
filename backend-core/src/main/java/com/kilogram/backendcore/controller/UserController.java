@@ -1,5 +1,6 @@
 package com.kilogram.backendcore.controller;
 
+import com.kilogram.backendcore.dto.request.ChangePasswordRequest;
 import com.kilogram.backendcore.dto.request.LoginRequest;
 import com.kilogram.backendcore.dto.request.UpdateProfileRequest;
 import com.kilogram.backendcore.dto.request.UserRegistrationRequest;
@@ -81,5 +82,26 @@ public class UserController {
 
         UserResponse response = userService.updateProfile(currentUsername, request);
         return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Changes the password of the currently authenticated user.
+     *
+     * @param principal the currently logged-in user injected by Spring Security
+     * @param request the password change payload
+     * @return HTTP 200 OK if successful
+     */
+    @PutMapping("/password")
+    public ResponseEntity<String> changePassword(
+            java.security.Principal principal,
+            @Valid @RequestBody ChangePasswordRequest request) {
+
+        String currentUsername = principal.getName();
+        log.info("REST request to change password for current user: {}", currentUsername);
+
+        userService.changePassword(currentUsername, request);
+
+        // Return a simple success message
+        return ResponseEntity.ok("Password updated successfully");
     }
 }

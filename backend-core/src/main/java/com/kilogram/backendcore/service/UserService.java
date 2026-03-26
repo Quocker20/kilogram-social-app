@@ -1,5 +1,6 @@
 package com.kilogram.backendcore.service;
 
+import com.kilogram.backendcore.dto.request.ChangePasswordRequest;
 import com.kilogram.backendcore.dto.request.LoginRequest;
 import com.kilogram.backendcore.dto.request.UpdateProfileRequest;
 import com.kilogram.backendcore.dto.request.UserRegistrationRequest;
@@ -42,4 +43,12 @@ public interface UserService {
      * @return updated UserResponse
      */
     UserResponse updateProfile(String currentUsername, UpdateProfileRequest request);
+
+    /**
+     * Changes the password for the currently authenticated user.
+     *
+     * @param currentUsername the username extracted from the Security Context
+     * @param request containing the old and new passwords
+     */
+    void changePassword(String currentUsername, ChangePasswordRequest request);
 }
