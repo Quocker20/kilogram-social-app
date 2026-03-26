@@ -1,6 +1,7 @@
 package com.kilogram.backendcore.controller;
 
 import com.kilogram.backendcore.dto.request.LoginRequest;
+import com.kilogram.backendcore.dto.request.UpdateProfileRequest;
 import com.kilogram.backendcore.dto.request.UserRegistrationRequest;
 import com.kilogram.backendcore.dto.response.AuthResponse;
 import com.kilogram.backendcore.dto.response.UserResponse;
@@ -60,6 +61,25 @@ public class UserController {
     public ResponseEntity<UserResponse> getUserProfile(@PathVariable String username) {
         log.info("REST request to get profile for user: {}", username);
         UserResponse response = userService.getUserProfile(username);
+        return ResponseEntity.ok(response);
+    }
+
+    /**
+     * Updates the currently authenticated user's profile details.
+     *
+     * @param principal the currently logged-in user injected by Spring Security
+     * @param request the profile data to update
+     * @return the updated user profile
+     */
+    @PutMapping("/me")
+    public ResponseEntity<UserResponse> updateMyProfile(
+            java.security.Principal principal,
+            @Valid @RequestBody UpdateProfileRequest request) {
+
+        String currentUsername = principal.getName();
+        log.info("REST request to update profile for current user: {}", currentUsername);
+
+        UserResponse response = userService.updateProfile(currentUsername, request);
         return ResponseEntity.ok(response);
     }
 }

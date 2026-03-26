@@ -1,5 +1,6 @@
 package com.kilogram.backendcore.service.impl;
 
+import com.kilogram.backendcore.dto.request.UpdateProfileRequest;
 import com.kilogram.backendcore.dto.request.UserRegistrationRequest;
 import com.kilogram.backendcore.dto.request.LoginRequest;
 import com.kilogram.backendcore.dto.response.AuthResponse;
@@ -107,5 +108,33 @@ public class UserServiceImpl implements UserService {
         return AuthResponse.builder()
                 .accessToken(token)
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public UserResponse updateProfile(String currentUsername, UpdateProfileRequest request) {
+        log.info("Processing profile update for user: {}", currentUsername);
+
+        User user = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> {
+                    log.error("Update failed: User '{}' not found in database", currentUsername);
+                    return new IllegalArgumentException("User not found");
+                });
+
+        // Update fields only if they are provided in the request
+        if (request.getDisplayName() != null && !request.getDisplayName().trim().isEmpty()) {
+            log.debug("Updating display name for user {}", currentUsername);
+            user.setDisplayName(request.getDisplayName().trim());
+        }
+
+        if (request.getBio() != null) {
+            log.debug("Updating bio for user {}", currentUsername);
+            user.setBio(request.getBio().trim());
+        }
+
+        User savedUser = userRepository.save(user);
+        log.info("Profile updated successfully for user: {}", currentUsername);
+
+        return mapToUserResponse(savedUser);
     }
 }

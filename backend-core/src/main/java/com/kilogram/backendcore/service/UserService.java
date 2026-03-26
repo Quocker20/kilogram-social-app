@@ -1,6 +1,7 @@
 package com.kilogram.backendcore.service;
 
 import com.kilogram.backendcore.dto.request.LoginRequest;
+import com.kilogram.backendcore.dto.request.UpdateProfileRequest;
 import com.kilogram.backendcore.dto.request.UserRegistrationRequest;
 import com.kilogram.backendcore.dto.response.AuthResponse;
 import com.kilogram.backendcore.dto.response.UserResponse;
@@ -32,4 +33,13 @@ public interface UserService {
      * @return AuthResponse containing the JWT token
      */
     AuthResponse loginUser(LoginRequest request);
+
+    /**
+     * Updates the profile information of the currently authenticated user.
+     *
+     * @param currentUsername the username extracted from the Security Context
+     * @param request the new profile data
+     * @return updated UserResponse
+     */
+    UserResponse updateProfile(String currentUsername, UpdateProfileRequest request);
 }
