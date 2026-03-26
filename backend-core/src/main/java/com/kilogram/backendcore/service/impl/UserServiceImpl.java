@@ -83,6 +83,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public AuthResponse loginUser(LoginRequest request) {
         log.info("Processing login request for user: {}", request.getUsername());
 
@@ -132,6 +133,12 @@ public class UserServiceImpl implements UserService {
         if (request.getBio() != null) {
             log.debug("Updating bio for user {}", currentUsername);
             user.setBio(request.getBio().trim());
+        }
+
+        // Update avatar URL if provided
+        if (request.getAvatarUrl() != null && !request.getAvatarUrl().trim().isEmpty()) {
+            log.debug("Updating avatar URL for user {}", currentUsername);
+            user.setAvatarUrl(request.getAvatarUrl().trim());
         }
 
         User savedUser = userRepository.save(user);
@@ -194,6 +201,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public java.util.List<UserResponse> searchUsers(String keyword) {
         log.info("Processing user search with keyword: {}", keyword);
 
