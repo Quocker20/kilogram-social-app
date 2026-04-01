@@ -3,6 +3,7 @@ package com.kilogram.backendcore.repository;
 import com.kilogram.backendcore.entity.Post;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -12,7 +13,7 @@ import java.util.List;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, String> {
-
+    @EntityGraph(attributePaths = {"user"})
     Slice<Post> findByUserIdOrderByCreatedAtDesc(String userId, Pageable pageable);
 
     /**
@@ -26,5 +27,6 @@ public interface PostRepository extends JpaRepository<Post, String> {
     @Query("SELECT p FROM Post p JOIN FETCH p.user JOIN Follow f ON p.user.id = f.following.id WHERE f.follower.id = :currentUserId ORDER BY p.createdAt DESC")
     Slice<Post> findPostsFromFollowedUsers(@Param("currentUserId") String currentUserId, Pageable pageable);
 
+    @EntityGraph(attributePaths = {"user"})
     List<Post> findByIdIn(List<String> postIds);
 }

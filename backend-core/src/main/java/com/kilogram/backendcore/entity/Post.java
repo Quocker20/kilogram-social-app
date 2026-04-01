@@ -36,6 +36,17 @@ public class Post {
     @Builder.Default
     private int commentCount = 0;
 
+    @Builder.Default
+    @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
+    @org.hibernate.annotations.BatchSize(size = 20)
+    private java.util.List<PostImage> images = new java.util.ArrayList<>();
+
+    // Helper method to synchronize the bidirectional relationship
+    public void addImage(PostImage image) {
+        images.add(image);
+        image.setPost(this);
+    }
+
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
