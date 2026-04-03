@@ -48,7 +48,7 @@ public class User {
     @Builder.Default
     private int numOfFollowing = 0;
 
-    @Column(name = "is_active", columnDefinition = "BOOLEAN DEFAULT TRUE")
+    @Column(name = "is_active", nullable = false, columnDefinition = "BOOLEAN DEFAULT TRUE")
     @Builder.Default
     private boolean isActive = true;
 
