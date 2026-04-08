@@ -22,15 +22,15 @@ public class Conversation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(length = 36, updatable = false, nullable = false)
+    @Column(length = 36, nullable = false, updatable = false)
     private String id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user1_id", nullable = false)
+    @JoinColumn(name = "user1_id", nullable = false, updatable = false)
     private User user1;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user2_id", nullable = false)
+    @JoinColumn(name = "user2_id", nullable = false, updatable = false)
     private User user2;
 
     @Column(name = "last_message", columnDefinition = "TEXT")
@@ -40,7 +40,7 @@ public class Conversation {
     private LocalDateTime lastMessageAt;
 
     @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @PrePersist
