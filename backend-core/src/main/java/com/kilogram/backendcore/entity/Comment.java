@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Table(
         name = "comments",
         indexes = {
-                @Index(name = "idx_post_comments", columnList = "post_id")
+                @Index(name = "idx_post_created", columnList = "post_id, created_at ASC")
         }
 )
 @Getter
