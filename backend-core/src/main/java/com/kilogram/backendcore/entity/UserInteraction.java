@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 public class UserInteraction {
 
     public enum InteractionType {
-        LIKE, COMMENT, VIEW
+        LIKE, UNLIKE, COMMENT, DELETE_COMMENT, VIEW
     }
 
     @Id
