@@ -5,20 +5,9 @@ import { ProtectedRoute } from './routes/ProtectedRoute';
 import { PublicRoute } from './routes/PublicRoute';
 import MainLayout from './layouts/MainLayout';
 import Login from './pages/Login';
+import Feed from './features/feed/Feed';
 
-/**
- * Temporary components for feed and profile logic.
- */
-const Feed = () => (
-  <div className="mx-auto max-w-xl">
-    <h2 className="mb-4 text-xl font-bold">Bảng tin</h2>
-    <div className="space-y-4">
-      <div className="flex h-96 items-center justify-center rounded-xl border border-gray-200 bg-gray-100 text-gray-400">
-        Posts will appear here...
-      </div>
-    </div>
-  </div>
-);
+
 
 const PlaceholderPage = ({ title }: { title: string }) => (
   <div className="py-20 text-center font-bold text-gray-400">

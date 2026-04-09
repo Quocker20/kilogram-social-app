@@ -1,5 +1,6 @@
 package com.kilogram.backendcore.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Builder;
 import lombok.Data;
 
@@ -15,6 +16,9 @@ public class PostResponse {
     private int commentCount;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    @JsonProperty("isLikedByMe")
+    private boolean isLikedByMe;
 
     private UserResponse author;
     private List<PostImageResponse> images;

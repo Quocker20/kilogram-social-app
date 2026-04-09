@@ -8,6 +8,7 @@ import com.kilogram.backendcore.dto.response.UserResponse;
 import com.kilogram.backendcore.entity.Post;
 import com.kilogram.backendcore.entity.PostImage;
 import com.kilogram.backendcore.entity.User;
+import com.kilogram.backendcore.repository.LikeRepository;
 import com.kilogram.backendcore.repository.PostRepository;
 import com.kilogram.backendcore.repository.UserRepository;
 import com.kilogram.backendcore.service.PostService;
@@ -19,8 +20,10 @@ import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,6 +33,7 @@ public class PostServiceImpl implements PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final LikeRepository likeRepository;
 
     @Override
     @Transactional
@@ -44,7 +48,6 @@ public class PostServiceImpl implements PostService {
                 .content(request.getContent())
                 .build();
 
-        // Map image URLs to PostImage entities
         if (request.getImageUrls() != null && !request.getImageUrls().isEmpty()) {
             for (int i = 0; i < request.getImageUrls().size(); i++) {
                 PostImage postImage = PostImage.builder()
@@ -116,11 +119,32 @@ public class PostServiceImpl implements PostService {
         User currentUser = userRepository.findByUsername(currentUsername)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        // No need to add Sort here because the Native/JPQL query already has ORDER BY
         Pageable pageable = PageRequest.of(page, size);
-        Slice<Post> posts = postRepository.findPostsFromFollowedUsers(currentUser.getId(), pageable);
 
-        return posts.map(this::mapToPostResponse);
+        // 1. Fetch the slice of posts (Query 1)
+        Slice<Post> postsSlice = postRepository.findPostsFromFollowedUsers(currentUser.getId(), pageable);
+
+        if (!postsSlice.hasContent()) {
+            return postsSlice.map(this::mapToPostResponse);
+        }
+
+        // 2. Extract IDs into a list in-memory
+        List<String> postIds = postsSlice.getContent().stream()
+                .map(Post::getId)
+                .collect(Collectors.toList());
+
+        // 3. Fetch all liked post IDs for this user in a single batch query (Query 2)
+        List<String> likedPostIdsList = likeRepository.findLikedPostIdsByUserAndPosts(currentUser.getId(), postIds);
+
+        // 4. Convert to HashSet for O(1) lookup performance
+        Set<String> likedPostIdsSet = new HashSet<>(likedPostIdsList);
+
+        // 5. Map entities to DTOs and inject the like status without triggering N+1 queries
+        return postsSlice.map(post -> {
+            PostResponse response = mapToPostResponse(post);
+            response.setLikedByMe(likedPostIdsSet.contains(post.getId()));
+            return response;
+        });
     }
 
     @Override
@@ -130,22 +154,17 @@ public class PostServiceImpl implements PostService {
             return List.of();
         }
 
-        // Fetch unordered posts from DB
         List<Post> unorderedPosts = postRepository.findByIdIn(recommendedPostIds);
 
-        // Convert to a Map for O(1) lookup speed
         Map<String, Post> postMap = unorderedPosts.stream()
                 .collect(Collectors.toMap(Post::getId, post -> post));
 
-        // Stream through the original IDs list to maintain the exact AI-recommended order
         return recommendedPostIds.stream()
-                .filter(postMap::containsKey) // Skip any IDs that might have been deleted from DB
+                .filter(postMap::containsKey)
                 .map(postMap::get)
                 .map(this::mapToPostResponse)
                 .collect(Collectors.toList());
     }
-
-    // --- Helper Methods ---
 
     private PostResponse mapToPostResponse(Post post) {
         List<PostImageResponse> imageResponses = post.getImages().stream()

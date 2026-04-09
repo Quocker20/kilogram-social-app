@@ -10,6 +10,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface LikeRepository extends JpaRepository<Like, Like.LikeId> {
 
@@ -21,4 +23,8 @@ public interface LikeRepository extends JpaRepository<Like, Like.LikeId> {
 
     @Query("SELECT l.user FROM Like l WHERE l.post.id = :postId")
     Slice<User> findLikersByPostId(@Param("postId") String postId, Pageable pageable);
+
+    // Optimized batch query to fetch liked post IDs in a single call using IN clause
+    @Query("SELECT l.post.id FROM Like l WHERE l.user.id = :userId AND l.post.id IN :postIds")
+    List<String> findLikedPostIdsByUserAndPosts(@Param("userId") String userId, @Param("postIds") List<String> postIds);
 }
