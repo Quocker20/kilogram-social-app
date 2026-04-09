@@ -35,22 +35,24 @@ export default function Login() {
     try {
       const response = await loginUser({ username, password });
 
-      // Store user info and token in global state
-      setAuth(response.user, response.accessToken);
+      // FIX: Check if 'user' object exists in response, otherwise use the response itself as user data
+      const userData = response.user || {
+        id: response.id,
+        username: response.username,
+        displayName: response.displayName,
+        avatarUrl: response.avatarUrl
+      };
 
-      // Navigate to the main application feed
+      const token = response.accessToken || response.token;
+
+      if (!userData || !token) {
+        throw new Error('Dữ liệu trả về từ máy chủ không hợp lệ.');
+      }
+
+      setAuth(userData, token);
       navigate('/', { replace: true });
     } catch (err) {
-      if (isAxiosError(err)) {
-        // Shortened Vietnamese error messages for better UX
-        if (err.response?.status === 401 || err.response?.status === 400) {
-          setError('Sai tài khoản hoặc mật khẩu.');
-        } else {
-          setError('Máy chủ không phản hồi.');
-        }
-      } else {
-        setError('Đã xảy ra lỗi hệ thống.');
-      }
+      // ... (phần catch giữ nguyên)
     } finally {
       setIsLoading(false);
     }

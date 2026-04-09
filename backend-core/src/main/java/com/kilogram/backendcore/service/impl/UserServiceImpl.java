@@ -98,7 +98,6 @@ public class UserServiceImpl implements UserService {
             throw new IllegalArgumentException("Invalid username or password");
         }
 
-        // If the user logs in successfully but the account is deactivated -> Reactivate it automatically
         if (!user.isActive()) {
             log.info("Auto-reactivating account for user: {}", user.getUsername());
             user.setActive(true);
@@ -106,10 +105,20 @@ public class UserServiceImpl implements UserService {
         }
 
         String accessToken = jwtTokenProvider.generateToken(user.getUsername());
+
+        // Map User entity to UserResponse DTO
+        UserResponse userResponse = UserResponse.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .displayName(user.getDisplayName())
+                .avatarUrl(user.getAvatarUrl())
+                .build();
+
         log.info("Login successful for user: {}", request.getUsername());
 
         return AuthResponse.builder()
                 .accessToken(accessToken)
+                .user(userResponse)
                 .build();
     }
 
