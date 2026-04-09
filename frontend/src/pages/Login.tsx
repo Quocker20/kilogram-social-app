@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
+import { isAxiosError } from 'axios';
 import { loginUser } from '../features/auth/api/auth';
 import { useAuthStore } from '../store/authStore';
-import { isAxiosError } from 'axios';
 
+/**
+ * Enhanced Login page with localized UI, minimal error messages,
+ * and dynamic document title.
+ */
 export default function Login() {
   const navigate = useNavigate();
   const setAuth = useAuthStore((state) => state.setAuth);
@@ -15,6 +19,12 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Update browser tab title on component mount
+  useEffect(() => {
+    document.title = 'Kilogram';
+  }, []);
+
+  // Basic validation to enable/disable the submit button
   const isFormValid = username.trim().length > 0 && password.length > 0;
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -24,23 +34,22 @@ export default function Login() {
 
     try {
       const response = await loginUser({ username, password });
-      
-      // Save to global state (Zustand)
+
+      // Store user info and token in global state
       setAuth(response.user, response.accessToken);
-      
-      // Navigate to home page safely
+
+      // Navigate to the main application feed
       navigate('/', { replace: true });
     } catch (err) {
-      // Use Axios Type Guard to help TypeScript infer the 'err' type
       if (isAxiosError(err)) {
+        // Shortened Vietnamese error messages for better UX
         if (err.response?.status === 401 || err.response?.status === 400) {
-          setError('Sorry, your password was incorrect. Please double-check your password.');
+          setError('Sai tài khoản hoặc mật khẩu.');
         } else {
-          setError('A network error occurred. Please try again later.');
+          setError('Máy chủ không phản hồi.');
         }
       } else {
-        // Handle non-API errors (e.g., internal code logic issues)
-        setError('An unexpected error occurred. Please try again.');
+        setError('Đã xảy ra lỗi hệ thống.');
       }
     } finally {
       setIsLoading(false);
@@ -48,27 +57,32 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 py-12 sm:px-6 lg:px-8">
-      {/* Main Login Card */}
-      <div className="w-full max-w-[350px] bg-white border border-gray-300 px-10 py-10">
-        
-        {/* App Logo/Title */}
-        <div className="mb-8 text-center">
-          <h1 className="font-serif text-4xl font-bold italic tracking-wider text-gray-900">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 px-4 py-12">
+      {/* Main Container with soft rounded corners */}
+      <div className="w-full max-w-[380px] space-y-8 rounded-2xl border border-gray-200 bg-white p-10 shadow-sm">
+
+        {/* Header: Logo and Brand Name */}
+        <div className="flex flex-col items-center text-center">
+          <img
+            src="/logo.png"
+            alt="Kilogram"
+            className="mb-4 h-16 w-16 transition-transform hover:rotate-6 hover:scale-110"
+          />
+          <h1 className="font-serif text-4xl font-bold italic tracking-tight text-gray-900">
             Kilogram
           </h1>
         </div>
 
-        {/* Login Form */}
-        <form onSubmit={handleLogin} className="flex flex-col space-y-2">
-          
+        {/* Input Form Section */}
+        <form onSubmit={handleLogin} className="mt-8 space-y-4">
+
           <div className="relative">
             <input
               type="text"
-              placeholder="Username"
+              placeholder="Tên đăng nhập"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full rounded-sm border border-gray-300 bg-gray-50 px-2 pt-2 pb-2 text-sm focus:border-gray-400 focus:outline-none focus:ring-0"
+              className="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 text-sm transition-all focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
               required
               disabled={isLoading}
             />
@@ -77,10 +91,10 @@ export default function Login() {
           <div className="relative">
             <input
               type={showPassword ? 'text' : 'password'}
-              placeholder="Password"
+              placeholder="Mật khẩu"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-sm border border-gray-300 bg-gray-50 px-2 pt-2 pb-2 text-sm focus:border-gray-400 focus:outline-none focus:ring-0 pr-10"
+              className="w-full rounded-xl border border-gray-300 bg-gray-50 px-4 py-3 pr-12 text-sm transition-all focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
               required
               disabled={isLoading}
             />
@@ -88,38 +102,40 @@ export default function Login() {
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-sm font-semibold text-gray-600 hover:text-gray-400"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
               >
-                {showPassword ? <EyeOff size={18} strokeWidth={1.5} /> : <Eye size={18} strokeWidth={1.5} />}
+                {showPassword ? <EyeOff size={20} strokeWidth={1.5} /> : <Eye size={20} strokeWidth={1.5} />}
               </button>
             )}
           </div>
 
-          {/* Submit Button */}
+          {/* Action Button */}
           <button
             type="submit"
             disabled={!isFormValid || isLoading}
-            className={`mt-4 flex w-full items-center justify-center rounded-lg py-1.5 text-sm font-semibold text-white transition-colors
-              ${isFormValid && !isLoading ? 'bg-blue-500 hover:bg-blue-600' : 'bg-blue-300 cursor-not-allowed'}`}
+            className={`mt-4 flex w-full items-center justify-center rounded-xl py-3 text-sm font-bold text-white shadow-md transition-all
+              ${isFormValid && !isLoading
+                ? 'bg-blue-600 hover:bg-blue-700 active:scale-95'
+                : 'cursor-not-allowed bg-blue-300'}`}
           >
-            {isLoading ? <Loader2 size={20} className="animate-spin" /> : 'Log in'}
+            {isLoading ? <Loader2 size={20} className="animate-spin" /> : 'Đăng nhập'}
           </button>
 
-          {/* Error Message */}
+          {/* Shortized Error Feedback */}
           {error && (
-            <p className="mt-4 text-center text-sm text-red-500">
+            <div className="mt-4 text-center text-sm font-semibold text-red-500">
               {error}
-            </p>
+            </div>
           )}
         </form>
       </div>
 
-      {/* Redirect to Register Card */}
-      <div className="mt-4 w-full max-w-[350px] bg-white border border-gray-300 py-4 text-center">
-        <p className="text-sm text-gray-900">
-          Don't have an account?{' '}
-          <Link to="/register" className="font-semibold text-blue-500 hover:text-blue-700">
-            Sign up
+      {/* Footer Navigation */}
+      <div className="mt-6 w-full max-w-[380px] rounded-2xl border border-gray-200 bg-white py-6 text-center shadow-sm">
+        <p className="text-sm text-gray-600">
+          Bạn chưa có tài khoản?{' '}
+          <Link to="/register" className="font-bold text-blue-600 hover:underline">
+            Đăng ký ngay
           </Link>
         </p>
       </div>
