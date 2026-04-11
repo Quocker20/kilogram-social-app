@@ -1,6 +1,5 @@
 package com.kilogram.backendcore.service.impl;
 
-import com.kilogram.backendcore.dto.request.PostCreateRequest;
 import com.kilogram.backendcore.dto.request.PostUpdateRequest;
 import com.kilogram.backendcore.dto.response.PostImageResponse;
 import com.kilogram.backendcore.dto.response.PostResponse;
@@ -11,6 +10,7 @@ import com.kilogram.backendcore.entity.User;
 import com.kilogram.backendcore.repository.LikeRepository;
 import com.kilogram.backendcore.repository.PostRepository;
 import com.kilogram.backendcore.repository.UserRepository;
+import com.kilogram.backendcore.service.ImageService;
 import com.kilogram.backendcore.service.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.HashSet;
 import java.util.List;
@@ -34,24 +35,38 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final LikeRepository likeRepository;
+    private final ImageService imageService;
 
     @Override
     @Transactional
-    public PostResponse createPost(String currentUsername, PostCreateRequest request) {
+    public PostResponse createPost(String currentUsername, String content, List<MultipartFile> images) {
         log.info("Creating new post for user: {}", currentUsername);
 
         User user = userRepository.findByUsername(currentUsername)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
+        boolean hasNoImages = images == null || images.isEmpty();
+
+        if (hasNoImages) {
+            throw new IllegalArgumentException("Post must contain at least one image");
+        }
+
         Post post = Post.builder()
                 .user(user)
-                .content(request.getContent())
+                .content(content)
                 .build();
 
-        if (request.getImageUrls() != null && !request.getImageUrls().isEmpty()) {
-            for (int i = 0; i < request.getImageUrls().size(); i++) {
+        if (!hasNoImages) {
+            for (int i = 0; i < images.size(); i++) {
+                MultipartFile imageFile = images.get(i);
+
+                if (imageFile.isEmpty()) continue;
+
+                Map<String, String> uploadResult = imageService.uploadImage(imageFile);
+
                 PostImage postImage = PostImage.builder()
-                        .imageUrl(request.getImageUrls().get(i))
+                        .imageUrl(uploadResult.get("url"))
+                        .publicId(uploadResult.get("public_id"))
                         .displayOrder(i)
                         .build();
                 post.addImage(postImage);
@@ -121,25 +136,20 @@ public class PostServiceImpl implements PostService {
 
         Pageable pageable = PageRequest.of(page, size);
 
-        // 1. Fetch the slice of posts (Query 1)
         Slice<Post> postsSlice = postRepository.findPostsFromFollowedUsers(currentUser.getId(), pageable);
 
         if (!postsSlice.hasContent()) {
             return postsSlice.map(this::mapToPostResponse);
         }
 
-        // 2. Extract IDs into a list in-memory
         List<String> postIds = postsSlice.getContent().stream()
                 .map(Post::getId)
                 .collect(Collectors.toList());
 
-        // 3. Fetch all liked post IDs for this user in a single batch query (Query 2)
         List<String> likedPostIdsList = likeRepository.findLikedPostIdsByUserAndPosts(currentUser.getId(), postIds);
 
-        // 4. Convert to HashSet for O(1) lookup performance
         Set<String> likedPostIdsSet = new HashSet<>(likedPostIdsList);
 
-        // 5. Map entities to DTOs and inject the like status without triggering N+1 queries
         return postsSlice.map(post -> {
             PostResponse response = mapToPostResponse(post);
             response.setLikedByMe(likedPostIdsSet.contains(post.getId()));

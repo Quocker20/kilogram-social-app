@@ -27,6 +27,10 @@ public class PostImage {
     @Column(name = "image_url", nullable = false)
     private String imageUrl;
 
+    // Added to reference the asset in Cloudinary for future deletion
+    @Column(name = "public_id", nullable = false)
+    private String publicId;
+
     @Column(name = "display_order", nullable = false)
     private int displayOrder;
 

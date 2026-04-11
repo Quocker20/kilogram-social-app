@@ -4,6 +4,10 @@ server:
 spring:
   application:
     name: kilogram-backend
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 50MB
 
   datasource:
     url: jdbc:mysql://localhost:3306/kilogram_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8
@@ -24,3 +28,8 @@ app:
   jwt:
     secret: KilogramSuperSecretKeyForJwtGenerationDoNotShare2026!@#
     expiration-milliseconds: 86400000
+
+cloudinary:
+  cloud-name: dah2e3q3f
+  api-key: 523155919872356
+  api-secret: dvpOwhfDOEfPZllNMDuJ83gf084

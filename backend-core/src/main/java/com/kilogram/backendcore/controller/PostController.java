@@ -1,6 +1,5 @@
 package com.kilogram.backendcore.controller;
 
-import com.kilogram.backendcore.dto.request.PostCreateRequest;
 import com.kilogram.backendcore.dto.request.PostUpdateRequest;
 import com.kilogram.backendcore.dto.response.PostResponse;
 import com.kilogram.backendcore.service.PostService;
@@ -9,8 +8,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
 import java.util.List;
@@ -19,16 +21,19 @@ import java.util.List;
 @RequestMapping("/api/posts")
 @RequiredArgsConstructor
 @Slf4j
+@Validated
 public class PostController {
 
     private final PostService postService;
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<PostResponse> createPost(
             Principal principal,
-            @Valid @RequestBody PostCreateRequest request) {
+            @RequestPart(value = "content", required = false) String content,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images) {
+
         log.info("REST request to create post for user: {}", principal.getName());
-        PostResponse response = postService.createPost(principal.getName(), request);
+        PostResponse response = postService.createPost(principal.getName(), content, images);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
@@ -43,19 +48,17 @@ public class PostController {
             Principal principal,
             @PathVariable String postId,
             @Valid @RequestBody PostUpdateRequest request) {
-        log.info("REST request to update post: {} by user: {}", postId, principal.getName());
-        return ResponseEntity.ok(postService.updatePost(principal.getName(), postId, request));
+        log.info("REST request to update post {} by user: {}", postId, principal.getName());
+        PostResponse response = postService.updatePost(principal.getName(), postId, request);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{postId}")
-    public ResponseEntity<String> deletePost(
-            Principal principal,
-            @PathVariable String postId) {
-        log.info("REST request to delete post: {} by user: {}", postId, principal.getName());
+    public ResponseEntity<String> deletePost(Principal principal, @PathVariable String postId) {
+        log.info("REST request to delete post {} by user: {}", postId, principal.getName());
         postService.deletePost(principal.getName(), postId);
         return ResponseEntity.ok("Post deleted successfully");
     }
-
 
     @GetMapping("/users/{username}")
     public ResponseEntity<Slice<PostResponse>> getUserPosts(
