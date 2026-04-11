@@ -1,13 +1,12 @@
 import { Home, Compass, MessageCircle, Search, Heart, PlusSquare, User } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
+import { useModalStore } from '../../store/modalStore';
 
-/**
- * Navigation Sidebar component featuring brand identity and main action links.
- */
 export default function Sidebar() {
   const location = useLocation();
   const logout = useAuthStore((state) => state.logout);
+  const openCreatePost = useModalStore((state) => state.openCreatePost);
 
   const menuItems = [
     { icon: Home, label: 'Trang chủ', path: '/' },
@@ -15,13 +14,11 @@ export default function Sidebar() {
     { icon: MessageCircle, label: 'Tin nhắn', path: '/messages' },
     { icon: Search, label: 'Tìm kiếm', path: '/search' },
     { icon: Heart, label: 'Thông báo', path: '/notifications' },
-    { icon: PlusSquare, label: 'Tạo', path: '/create' },
     { icon: User, label: 'Trang cá nhân', path: '/profile' },
   ];
 
   return (
     <div className="fixed left-0 top-0 flex h-full w-20 flex-col border-r border-gray-200 bg-white px-3 py-8 xl:w-64">
-      {/* Brand Identity */}
       <div className="mb-10 px-4">
         <h1 className="hidden font-serif text-2xl font-bold italic xl:block">Kilogram</h1>
         <div className="block xl:hidden">
@@ -29,7 +26,6 @@ export default function Sidebar() {
         </div>
       </div>
 
-      {/* Navigation Links */}
       <nav className="flex flex-1 flex-col space-y-2">
         {menuItems.map((item) => {
           const Icon = item.icon;
@@ -47,9 +43,16 @@ export default function Sidebar() {
             </Link>
           );
         })}
+
+        <button
+          onClick={() => openCreatePost()}
+          className="flex w-full items-center space-x-4 rounded-xl px-4 py-3 text-left font-medium transition-colors hover:bg-gray-100"
+        >
+          <PlusSquare size={26} strokeWidth={2} />
+          <span className="hidden text-base xl:block">Tạo</span>
+        </button>
       </nav>
 
-      {/* Logout Action (Minimal Text Only) */}
       <button
         onClick={() => logout()}
         className="mt-auto w-full px-4 py-3 text-center text-xs font-light text-gray-400 transition-colors hover:text-gray-600 xl:text-left xl:text-sm xl:pl-[58px]"
