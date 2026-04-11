@@ -1,3 +1,4 @@
+import { Copyright } from 'lucide-react'; // Import icon copyright
 import { useAuthStore } from '../../store/authStore';
 
 /**
@@ -5,6 +6,9 @@ import { useAuthStore } from '../../store/authStore';
  */
 export default function RightPanel() {
   const user = useAuthStore((state) => state.user);
+
+  // Get current year from system
+  const currentYear = new Date().getFullYear();
 
   return (
     <div className="hidden w-80 flex-col space-y-6 py-8 pl-8 lg:flex">
@@ -42,6 +46,14 @@ export default function RightPanel() {
             <button className="text-xs font-bold text-blue-500 hover:text-blue-800">Theo dõi</button>
           </div>
         ))}
+      </div>
+
+      {/* Footer / Copyright Section */}
+      <div className="mt-8 pt-4">
+        <div className="flex items-center space-x-1 text-[11px] font-semibold uppercase tracking-tight text-gray-400">
+          <Copyright size={12} />
+          <span>{currentYear} KILOGRAM FROM QUOC</span>
+        </div>
       </div>
     </div>
   );
