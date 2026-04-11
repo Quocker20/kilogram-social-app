@@ -56,21 +56,19 @@ public class PostServiceImpl implements PostService {
                 .content(content)
                 .build();
 
-        if (!hasNoImages) {
-            for (int i = 0; i < images.size(); i++) {
-                MultipartFile imageFile = images.get(i);
+        for (int i = 0; i < images.size(); i++) {
+            MultipartFile imageFile = images.get(i);
 
-                if (imageFile.isEmpty()) continue;
+            if (imageFile.isEmpty()) continue;
 
-                Map<String, String> uploadResult = imageService.uploadImage(imageFile);
+            Map<String, String> uploadResult = imageService.uploadImage(imageFile);
 
-                PostImage postImage = PostImage.builder()
-                        .imageUrl(uploadResult.get("url"))
-                        .publicId(uploadResult.get("public_id"))
-                        .displayOrder(i)
-                        .build();
-                post.addImage(postImage);
-            }
+            PostImage postImage = PostImage.builder()
+                    .imageUrl(uploadResult.get("url"))
+                    .publicId(uploadResult.get("public_id"))
+                    .displayOrder(i)
+                    .build();
+            post.addImage(postImage);
         }
 
         Post savedPost = postRepository.save(post);
