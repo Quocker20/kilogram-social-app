@@ -14,7 +14,7 @@ import java.util.List;
 
 @Repository
 public interface PostRepository extends JpaRepository<Post, String> {
-    @EntityGraph(attributePaths = {"user"})
+    @EntityGraph(attributePaths = {"user", "images"})
     Slice<Post> findByUserIdOrderByCreatedAtDesc(String userId, Pageable pageable);
 
     /**
