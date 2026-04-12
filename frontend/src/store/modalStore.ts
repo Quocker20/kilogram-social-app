@@ -1,13 +1,16 @@
 import { create } from 'zustand';
+import type { Post } from '../types';
 
 interface ModalState {
-  isCreatePostOpen: boolean;
-  openCreatePost: () => void;
-  closeCreatePost: () => void;
+  isPostModalOpen: boolean;
+  postToEdit: Post | null;
+  openPostModal: (post?: Post) => void;
+  closePostModal: () => void;
 }
 
 export const useModalStore = create<ModalState>((set) => ({
-  isCreatePostOpen: false,
-  openCreatePost: () => set({ isCreatePostOpen: true }),
-  closeCreatePost: () => set({ isCreatePostOpen: false }),
+  isPostModalOpen: false,
+  postToEdit: null,
+  openPostModal: (post) => set({ isPostModalOpen: true, postToEdit: post || null }),
+  closePostModal: () => set({ isPostModalOpen: false, postToEdit: null }),
 }));

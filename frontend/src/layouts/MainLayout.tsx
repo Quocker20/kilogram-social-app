@@ -1,7 +1,7 @@
 import { Outlet } from 'react-router-dom';
 import Sidebar from '../components/layout/Sidebar';
 import RightPanel from '../components/layout/RightPanel';
-import CreatePostModal from '../features/post/components/CreatePostModal';
+import CreatePostModal from '../features/post/components/PostModal';
 
 export default function MainLayout() {
   return (

@@ -1,5 +1,5 @@
 import { apiClient } from '../../../lib/axios';
-import type { Posts } from '../../../types';
+import type { Post } from '../../../types';
 
 export const posts = {
   createPost: async (content: string, images: File[]): Promise<Post> => {
@@ -20,5 +20,39 @@ export const posts = {
     });
 
     return response.data;
+  },
+
+  updatePost: async (
+    postId: string,
+    content: string,
+    retainedImageIds: string[],
+    newImages: File[]
+  ): Promise<Post> => {
+    const formData = new FormData();
+
+    if (content.trim()) {
+      formData.append('content', content);
+    }
+
+    formData.append(
+      'retainedImageIds',
+      new Blob([JSON.stringify(retainedImageIds)], { type: 'application/json' })
+    );
+
+    newImages.forEach((file) => {
+      formData.append('newImages', file);
+    });
+
+    const response = await apiClient.put<Post>(`/posts/${postId}`, formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    });
+
+    return response.data;
+  },
+
+  deletePost: async (postId: string): Promise<void> => {
+    await apiClient.delete(`/posts/${postId}`);
   },
 };
