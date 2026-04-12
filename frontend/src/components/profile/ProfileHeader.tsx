@@ -1,5 +1,6 @@
 import { useAuthStore } from '../../store/authStore';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { Link } from 'react-router-dom';
 import { users} from '../../features/user/api/users';
 import type { User } from '../../types';
 
@@ -36,9 +37,9 @@ export default function ProfileHeader({ profile }: ProfileHeaderProps) {
 
           <div className="flex space-x-2">
             {isMe ? (
-              <button className="px-4 py-1.5 border border-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-colors">
+              <Link to="/accounts/edit" className="px-4 py-1.5 border border-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-colors inline-block text-center flex items-center justify-center">
                 Edit Profile
-              </button>
+              </Link>
             ) : (
               <button
                 onClick={() => followMutation.mutate()}

@@ -7,6 +7,8 @@ import MainLayout from './layouts/MainLayout';
 import Login from './pages/Login';
 import Feed from './features/feed/Feed';
 import Profile from './pages/Profile'; // Đã thêm import Profile
+import Search from './pages/Search';
+import EditProfile from './pages/EditProfile';
 
 const PlaceholderPage = ({ title }: { title: string }) => (
   <div className="py-20 text-center font-bold text-gray-400">
@@ -31,7 +33,8 @@ export default function App() {
               <Route path="/" element={<Feed />} />
               <Route path="/explore" element={<PlaceholderPage title="Khám phá" />} />
               <Route path="/messages" element={<PlaceholderPage title="Tin nhắn" />} />
-              <Route path="/search" element={<PlaceholderPage title="Tìm kiếm" />} />
+              <Route path="/search" element={<Search />} />
+              <Route path="/accounts/edit" element={<EditProfile />} />
               <Route path="/notifications" element={<PlaceholderPage title="Thông báo" />} />
               <Route path="/create" element={<PlaceholderPage title="Tạo bài viết" />} />
 

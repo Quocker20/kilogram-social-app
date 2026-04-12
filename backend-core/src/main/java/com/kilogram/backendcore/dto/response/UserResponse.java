@@ -1,5 +1,6 @@
 package com.kilogram.backendcore.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -28,6 +29,9 @@ public class UserResponse {
     private int numOfFollowing;
 
     private LocalDateTime createdAt;
+
+    @JsonProperty("isFollowing")
+    private boolean isFollowing;
 
     // Notice: password, dob, and updatedAt are intentionally omitted for security and payload size.
 }

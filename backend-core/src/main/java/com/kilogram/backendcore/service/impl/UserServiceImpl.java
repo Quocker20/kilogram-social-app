@@ -66,16 +66,25 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public UserResponse getUserProfile(String username) {
-        log.info("Fetching profile information for username: {}", username);
+    public UserResponse getUserProfile(String currentUsername, String targetUsername) {
+        log.info("Fetching profile information for username: {}", targetUsername);
 
-        User user = userRepository.findByUsername(username)
+        User targetUser = userRepository.findByUsername(targetUsername)
                 .orElseThrow(() -> {
-                    log.error("Data retrieval error: User '{}' not found", username);
-                    return new IllegalArgumentException("User not found with username: " + username);
+                    log.error("Data retrieval error: User '{}' not found", targetUsername);
+                    return new IllegalArgumentException("User not found with username: " + targetUsername);
                 });
 
-        return mapToUserResponse(user);
+        UserResponse response = mapToUserResponse(targetUser);
+
+        if (currentUsername != null && !currentUsername.equals(targetUsername)) {
+            userRepository.findByUsername(currentUsername).ifPresent(currentUser -> {
+                boolean isFollowing = followRepository.findByFollowerAndFollowing(currentUser, targetUser).isPresent();
+                response.setFollowing(isFollowing);
+            });
+        }
+        
+        return response;
     }
 
     private UserResponse mapToUserResponse(User user) {

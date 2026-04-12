@@ -28,5 +28,12 @@ export const users = {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
     return response.data;
+  },
+
+  searchUsers: async (keyword: string): Promise<User[]> => {
+    const response = await apiClient.get<User[]>('/users/search', {
+      params: { q: keyword },
+    });
+    return response.data;
   }
 };

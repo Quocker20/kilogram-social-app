@@ -63,9 +63,14 @@ public class UserController {
      * @return the user profile data
      */
     @GetMapping("/{username}")
-    public ResponseEntity<UserResponse> getUserProfile(@PathVariable String username) {
-        log.info("REST request to get profile for user: {}", username);
-        UserResponse response = userService.getUserProfile(username);
+    public ResponseEntity<UserResponse> getUserProfile(
+            java.security.Principal principal, 
+            @PathVariable String username) {
+            
+        String currentUsername = principal != null ? principal.getName() : null;
+        log.info("REST request to get profile for user {} by {}", username, currentUsername);
+        
+        UserResponse response = userService.getUserProfile(currentUsername, username);
         return ResponseEntity.ok(response);
     }
 

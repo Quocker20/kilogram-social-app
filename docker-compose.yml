@@ -3,9 +3,11 @@ services:
     image: mysql:8.0
     container_name: kilogram-mysql
     restart: always
+    env_file:
+      - kilogram.env
     environment:
       MYSQL_DATABASE: kilogram_db
-      MYSQL_ROOT_PASSWORD: admin
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-admin}
     ports:
       - "3306:3306"
     volumes:
