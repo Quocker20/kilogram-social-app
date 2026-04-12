@@ -5,8 +5,8 @@ import { useModalStore } from '../../store/modalStore';
 
 export default function Sidebar() {
   const location = useLocation();
-  const logout = useAuthStore((state) => state.logout);
-  const openCreatePost = useModalStore((state) => state.openCreatePost);
+  const { user: currentUser, logout } = useAuthStore();
+  const openPostModal = useModalStore((state) => state.openPostModal);
 
   const menuItems = [
     { icon: Home, label: 'Trang chủ', path: '/' },
@@ -14,7 +14,7 @@ export default function Sidebar() {
     { icon: MessageCircle, label: 'Tin nhắn', path: '/messages' },
     { icon: Search, label: 'Tìm kiếm', path: '/search' },
     { icon: Heart, label: 'Thông báo', path: '/notifications' },
-    { icon: User, label: 'Trang cá nhân', path: '/profile' },
+    { icon: User, label: 'Trang cá nhân', path: `/${currentUser?.username || ''}` },
   ];
 
   return (
@@ -32,7 +32,7 @@ export default function Sidebar() {
           const isActive = location.pathname === item.path;
           return (
             <Link
-              key={item.path}
+              key={item.label}
               to={item.path}
               className={`flex items-center space-x-4 rounded-xl px-4 py-3 transition-colors hover:bg-gray-100 ${
                 isActive ? 'font-bold' : 'font-medium'
@@ -45,7 +45,7 @@ export default function Sidebar() {
         })}
 
         <button
-          onClick={() => openCreatePost()}
+          onClick={() => openPostModal()}
           className="flex w-full items-center space-x-4 rounded-xl px-4 py-3 text-left font-medium transition-colors hover:bg-gray-100"
         >
           <PlusSquare size={26} strokeWidth={2} />

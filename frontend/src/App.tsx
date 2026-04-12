@@ -6,8 +6,7 @@ import { PublicRoute } from './routes/PublicRoute';
 import MainLayout from './layouts/MainLayout';
 import Login from './pages/Login';
 import Feed from './features/feed/Feed';
-
-
+import Profile from './pages/Profile'; // Đã thêm import Profile
 
 const PlaceholderPage = ({ title }: { title: string }) => (
   <div className="py-20 text-center font-bold text-gray-400">
@@ -35,7 +34,9 @@ export default function App() {
               <Route path="/search" element={<PlaceholderPage title="Tìm kiếm" />} />
               <Route path="/notifications" element={<PlaceholderPage title="Thông báo" />} />
               <Route path="/create" element={<PlaceholderPage title="Tạo bài viết" />} />
-              <Route path="/profile" element={<PlaceholderPage title="Trang cá nhân" />} />
+
+              {/* ĐÃ SỬA: Định tuyến động để bắt username từ URL */}
+              <Route path="/:username" element={<Profile />} />
             </Route>
           </Route>
 

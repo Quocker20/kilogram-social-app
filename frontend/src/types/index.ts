@@ -3,6 +3,11 @@ export interface User {
   username: string;
   displayName?: string;
   avatarUrl?: string;
+  bio?: string;
+  numOfFollowers?: number;
+  numOfFollowing?: number;
+  postCount?: number;
+  isFollowing?: boolean;
 }
 
 export interface PostImage {
@@ -34,4 +39,12 @@ export interface Post {
 export interface AuthResponse {
   user: User;
   accessToken: string;
+}
+
+export interface Slice<T> {
+  content: T[];
+  last: boolean;
+  first: boolean;
+  size: number;
+  number: number;
 }
