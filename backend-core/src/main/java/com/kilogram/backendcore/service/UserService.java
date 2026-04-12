@@ -6,6 +6,7 @@ import com.kilogram.backendcore.dto.request.UserRegistrationRequest;
 import com.kilogram.backendcore.dto.request.LoginRequest;
 import com.kilogram.backendcore.dto.response.AuthResponse;
 import com.kilogram.backendcore.dto.response.UserResponse;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -16,7 +17,7 @@ public interface UserService {
 
     AuthResponse loginUser(LoginRequest request);
 
-    UserResponse updateProfile(String currentUsername, UpdateProfileRequest request);
+    UserResponse updateProfile(String currentUsername, UpdateProfileRequest request, MultipartFile avatarFile);
 
     void changePassword(String currentUsername, ChangePasswordRequest request);
 

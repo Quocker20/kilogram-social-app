@@ -11,13 +11,16 @@ import com.kilogram.backendcore.entity.User;
 import com.kilogram.backendcore.repository.FollowRepository;
 import com.kilogram.backendcore.repository.UserRepository;
 import com.kilogram.backendcore.security.JwtTokenProvider;
+import com.kilogram.backendcore.service.ImageService;
 import com.kilogram.backendcore.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -32,6 +35,7 @@ public class UserServiceImpl implements UserService {
     private final FollowRepository followRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final ImageService imageService;
 
     @Override
     @Transactional
@@ -128,7 +132,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public UserResponse updateProfile(String currentUsername, UpdateProfileRequest request) {
+    public UserResponse updateProfile(String currentUsername, UpdateProfileRequest request, MultipartFile avatarFile) {
         log.info("Processing profile update for user: {}", currentUsername);
 
         User user = userRepository.findByUsername(currentUsername)
@@ -147,9 +151,20 @@ public class UserServiceImpl implements UserService {
             user.setBio(request.getBio().trim());
         }
 
-        if (request.getAvatarUrl() != null && !request.getAvatarUrl().trim().isEmpty()) {
-            log.debug("Updating avatar URL for user {}", currentUsername);
-            user.setAvatarUrl(request.getAvatarUrl().trim());
+        if (avatarFile != null && !avatarFile.isEmpty()) {
+            log.debug("Updating avatar for user {}", currentUsername);
+
+            if (user.getAvatarPublicId() != null && !user.getAvatarPublicId().isEmpty()) {
+                try {
+                    imageService.deleteImage(user.getAvatarPublicId());
+                } catch (Exception e) {
+                    log.warn("Failed to delete old avatar from Cloudinary (Public ID: {})", user.getAvatarPublicId());
+                }
+            }
+
+            Map<String, String> uploadResult = imageService.uploadImage(avatarFile);
+            user.setAvatarUrl(uploadResult.get("url"));
+            user.setAvatarPublicId(uploadResult.get("public_id"));
         }
 
         User savedUser = userRepository.save(user);

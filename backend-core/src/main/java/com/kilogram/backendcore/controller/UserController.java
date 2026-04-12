@@ -11,8 +11,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 
@@ -68,21 +70,23 @@ public class UserController {
     }
 
     /**
-     * Updates the currently authenticated user's profile details.
+     * Updates the currently authenticated user's profile details using multipart/form-data.
      *
      * @param principal the currently logged-in user injected by Spring Security
-     * @param request the profile data to update
+     * @param request the profile data to update (as JSON part)
+     * @param avatar the avatar image file (optional)
      * @return the updated user profile
      */
-    @PutMapping("/me")
+    @PutMapping(value = "/me", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<UserResponse> updateMyProfile(
             java.security.Principal principal,
-            @Valid @RequestBody UpdateProfileRequest request) {
+            @RequestPart("data") @Valid UpdateProfileRequest request,
+            @RequestPart(value = "avatar", required = false) MultipartFile avatar) {
 
         String currentUsername = principal.getName();
         log.info("REST request to update profile for current user: {}", currentUsername);
 
-        UserResponse response = userService.updateProfile(currentUsername, request);
+        UserResponse response = userService.updateProfile(currentUsername, request, avatar);
         return ResponseEntity.ok(response);
     }
 

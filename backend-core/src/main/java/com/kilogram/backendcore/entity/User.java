@@ -34,6 +34,9 @@ public class User {
     @Column(name = "avatar_url")
     private String avatarUrl;
 
+    @Column(name = "avatar_public_id")
+    private String avatarPublicId;
+
     @Column(columnDefinition = "TEXT")
     private String bio;
 
