@@ -6,7 +6,9 @@ import com.kilogram.backendcore.dto.request.UserRegistrationRequest;
 import com.kilogram.backendcore.dto.request.LoginRequest;
 import com.kilogram.backendcore.dto.response.AuthResponse;
 import com.kilogram.backendcore.dto.response.UserResponse;
+import com.kilogram.backendcore.entity.Follow;
 import com.kilogram.backendcore.entity.User;
+import com.kilogram.backendcore.repository.FollowRepository;
 import com.kilogram.backendcore.repository.UserRepository;
 import com.kilogram.backendcore.security.JwtTokenProvider;
 import com.kilogram.backendcore.service.UserService;
@@ -16,8 +18,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 /**
- * Implementation of UserService handling core user operations like registration and profile retrieval.
+ * Implementation of UserService handling core user operations like registration, profile retrieval, and social interactions.
  */
 @Service
 @RequiredArgsConstructor
@@ -25,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final FollowRepository followRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
 
@@ -106,7 +111,6 @@ public class UserServiceImpl implements UserService {
 
         String accessToken = jwtTokenProvider.generateToken(user.getUsername());
 
-        // Map User entity to UserResponse DTO
         UserResponse userResponse = UserResponse.builder()
                 .id(user.getId())
                 .username(user.getUsername())
@@ -133,7 +137,6 @@ public class UserServiceImpl implements UserService {
                     return new IllegalArgumentException("User not found");
                 });
 
-        // Update fields only if they are provided in the request
         if (request.getDisplayName() != null && !request.getDisplayName().trim().isEmpty()) {
             log.debug("Updating display name for user {}", currentUsername);
             user.setDisplayName(request.getDisplayName().trim());
@@ -144,7 +147,6 @@ public class UserServiceImpl implements UserService {
             user.setBio(request.getBio().trim());
         }
 
-        // Update avatar URL if provided
         if (request.getAvatarUrl() != null && !request.getAvatarUrl().trim().isEmpty()) {
             log.debug("Updating avatar URL for user {}", currentUsername);
             user.setAvatarUrl(request.getAvatarUrl().trim());
@@ -167,19 +169,16 @@ public class UserServiceImpl implements UserService {
                     return new IllegalArgumentException("User not found");
                 });
 
-        // Verify the old password
         if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
             log.warn("Password change failed: Incorrect old password provided for user '{}'", currentUsername);
             throw new IllegalArgumentException("Incorrect current password");
         }
 
-        // Prevent setting the new password same as the old one (optional but good practice)
         if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
             log.warn("Password change failed: New password is the same as the old password for user '{}'", currentUsername);
             throw new IllegalArgumentException("New password cannot be the same as the current password");
         }
 
-        // Hash and save the new password
         log.debug("Encoding and saving new password for user {}", currentUsername);
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
@@ -222,9 +221,43 @@ public class UserServiceImpl implements UserService {
         java.util.List<User> users = userRepository.searchActiveUsersByKeyword(keyword.trim());
         log.info("Found {} active users matching the keyword", users.size());
 
-        // Convert the list of User entities to a list of UserResponse DTOs
         return users.stream()
                 .map(this::mapToUserResponse)
                 .collect(java.util.stream.Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public boolean toggleFollow(String currentUsername, String targetUsername) {
+        if (currentUsername.equals(targetUsername)) {
+            log.warn("User {} attempted to follow themselves", currentUsername);
+            throw new IllegalArgumentException("You cannot follow yourself");
+        }
+
+        User currentUser = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> new IllegalArgumentException("Current user not found"));
+
+        User targetUser = userRepository.findByUsername(targetUsername)
+                .orElseThrow(() -> new IllegalArgumentException("Target user not found"));
+
+        Optional<Follow> existingFollow = followRepository.findByFollowerAndFollowing(currentUser, targetUser);
+
+        if (existingFollow.isPresent()) {
+            log.info("User {} is unfollowing {}", currentUsername, targetUsername);
+            followRepository.delete(existingFollow.get());
+            userRepository.decrementFollowingCount(currentUser.getId());
+            userRepository.decrementFollowerCount(targetUser.getId());
+            return false;
+        } else {
+            log.info("User {} is following {}", currentUsername, targetUsername);
+            Follow newFollow = Follow.builder()
+                    .follower(currentUser)
+                    .following(targetUser)
+                    .build();
+            followRepository.save(newFollow);
+            userRepository.incrementFollowingCount(currentUser.getId());
+            userRepository.incrementFollowerCount(targetUser.getId());
+            return true;
+        }
     }
 }

@@ -14,6 +14,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 /**
  * REST Controller providing endpoints for user management and authentication.
  */
@@ -137,5 +139,24 @@ public class UserController {
         java.util.List<UserResponse> searchResults = userService.searchUsers(keyword);
 
         return ResponseEntity.ok(searchResults);
+    }
+
+    /**
+     * Toggles the follow status between the authenticated user and a target user.
+     *
+     * @param principal the currently logged-in user injected by Spring Security
+     * @param username  the username of the target user
+     * @return a map containing the current follow state {"isFollowing": true/false}
+     */
+    @PostMapping("/{username}/follow")
+    public ResponseEntity<Map<String, Boolean>> toggleFollow(
+            java.security.Principal principal,
+            @PathVariable String username) {
+
+        String currentUsername = principal.getName();
+        log.info("REST request to toggle follow for user: {} by {}", username, currentUsername);
+
+        boolean isFollowing = userService.toggleFollow(currentUsername, username);
+        return ResponseEntity.ok(Map.of("isFollowing", isFollowing));
     }
 }
