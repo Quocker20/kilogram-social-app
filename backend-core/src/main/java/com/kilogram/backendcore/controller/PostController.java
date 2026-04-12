@@ -1,9 +1,7 @@
 package com.kilogram.backendcore.controller;
 
-import com.kilogram.backendcore.dto.request.PostUpdateRequest;
 import com.kilogram.backendcore.dto.response.PostResponse;
 import com.kilogram.backendcore.service.PostService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Slice;
@@ -16,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.security.Principal;
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/posts")
@@ -31,7 +30,6 @@ public class PostController {
             Principal principal,
             @RequestPart(value = "content", required = false) String content,
             @RequestPart(value = "images", required = false) List<MultipartFile> images) {
-
         log.info("REST request to create post for user: {}", principal.getName());
         PostResponse response = postService.createPost(principal.getName(), content, images);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
@@ -43,13 +41,15 @@ public class PostController {
         return ResponseEntity.ok(postService.getPostById(postId));
     }
 
-    @PutMapping("/{postId}")
+    @PutMapping(value = "/{postId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<PostResponse> updatePost(
             Principal principal,
             @PathVariable String postId,
-            @Valid @RequestBody PostUpdateRequest request) {
+            @RequestPart(value = "content", required = false) String content,
+            @RequestPart(value = "retainedImageIds", required = false) Set<String> retainedImageIds,
+            @RequestPart(value = "newImages", required = false) List<MultipartFile> newImages) {
         log.info("REST request to update post {} by user: {}", postId, principal.getName());
-        PostResponse response = postService.updatePost(principal.getName(), postId, request);
+        PostResponse response = postService.updatePost(principal.getName(), postId, content, retainedImageIds, newImages);
         return ResponseEntity.ok(response);
     }
 
@@ -78,10 +78,6 @@ public class PostController {
         return ResponseEntity.ok(postService.getNewsFeed(principal.getName(), page, size));
     }
 
-    /**
-     * Endpoint to fetch posts based on AI recommendations.
-     * Uses POST to accept a list of IDs in the request body safely.
-     */
     @PostMapping("/explore/recommended")
     public ResponseEntity<List<PostResponse>> getRecommendedPosts(
             @RequestBody List<String> recommendedPostIds) {

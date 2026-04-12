@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Set;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -13,4 +15,6 @@ import lombok.NoArgsConstructor;
 public class PostUpdateRequest {
     @Size(max = 2200, message = "Caption cannot exceed 2200 characters")
     private String content;
+
+    private Set<String> retainedImageIds;
 }
