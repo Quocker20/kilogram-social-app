@@ -64,9 +64,11 @@ public class PostController {
     public ResponseEntity<Slice<PostResponse>> getUserPosts(
             @PathVariable String username,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        log.info("REST request to get posts for user: {}, page: {}, size: {}", username, page, size);
-        return ResponseEntity.ok(postService.getUserPosts(username, page, size));
+            @RequestParam(defaultValue = "10") int size,
+            Principal principal) {
+
+        String currentUsername = (principal != null) ? principal.getName() : null;
+        return ResponseEntity.ok(postService.getUserPosts(currentUsername, username, page, size));
     }
 
     @GetMapping("/feed")

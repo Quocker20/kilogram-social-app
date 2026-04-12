@@ -1,4 +1,5 @@
 import { Heart, MessageCircle } from 'lucide-react';
+import { useModalStore } from '../../store/modalStore';
 import type { Post } from '../../types';
 
 interface PostGridProps {
@@ -7,6 +8,8 @@ interface PostGridProps {
 }
 
 export default function PostGrid({ posts, isLoading }: PostGridProps) {
+  const openPostDetail = useModalStore((state) => state.openPostDetail);
+
   if (isLoading) {
     return (
       <div className="grid grid-cols-3 gap-1 md:gap-4 animate-pulse pt-4 border-t border-gray-200">
@@ -28,10 +31,14 @@ export default function PostGrid({ posts, isLoading }: PostGridProps) {
   return (
     <div className="grid grid-cols-3 gap-1 md:gap-4 border-t border-gray-200 pt-4">
       {posts.map((post) => (
-        <div key={post.id} className="relative group aspect-square cursor-pointer overflow-hidden bg-gray-100">
+        <div
+          key={post.id}
+          onClick={() => openPostDetail(post)}
+          className="relative group aspect-square cursor-pointer overflow-hidden bg-gray-100"
+        >
           <img
             src={post.images[0]?.imageUrl || `https://via.placeholder.com/400x400?text=No+Image`}
-            alt="Post content"
+            alt="Post preview"
             className="w-full h-full object-cover"
           />
 

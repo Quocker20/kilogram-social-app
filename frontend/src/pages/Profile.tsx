@@ -4,6 +4,7 @@ import { users as usersApi } from '../features/user/api/users';
 import { posts as postsApi } from '../features/post/api/posts';
 import ProfileHeader from '../components/profile/ProfileHeader';
 import PostGrid from '../components/profile/PostGrid';
+import PostDetailModal from '../components/post/PostDetailModal';
 
 export default function Profile() {
   const { username } = useParams<{ username: string }>();
@@ -21,7 +22,7 @@ export default function Profile() {
   });
 
   if (isProfileLoading) {
-    return <div className="py-10 text-center text-gray-500">Loading profile...</div>;
+    return <div className="py-10 text-center text-gray-500">Loading...</div>;
   }
 
   if (!profile) {
@@ -29,9 +30,10 @@ export default function Profile() {
   }
 
   return (
-    <main className="max-w-4xl mx-auto py-8">
+    <main className="max-w-4xl mx-auto py-8 px-4">
       <ProfileHeader profile={profile} />
       <PostGrid posts={postsData?.content || []} isLoading={isPostsLoading} />
+      <PostDetailModal />
     </main>
   );
 }

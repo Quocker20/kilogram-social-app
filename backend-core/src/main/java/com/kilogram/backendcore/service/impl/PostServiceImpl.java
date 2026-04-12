@@ -172,12 +172,32 @@ public class PostServiceImpl implements PostService {
 
     @Override
     @Transactional(readOnly = true)
-    public Slice<PostResponse> getUserPosts(String username, int page, int size) {
-        User user = userRepository.findByUsername(username)
+    public Slice<PostResponse> getUserPosts(String currentUsername, String username, int page, int size) {
+        User targetUser = userRepository.findByUsername(username)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
         Pageable pageable = PageRequest.of(page, size);
-        Slice<Post> posts = postRepository.findByUserIdOrderByCreatedAtDesc(user.getId(), pageable);
-        return posts.map(this::mapToPostResponse);
+        Slice<Post> postsSlice = postRepository.findByUserIdOrderByCreatedAtDesc(targetUser.getId(), pageable);
+
+        if (!postsSlice.hasContent()) {
+            return postsSlice.map(this::mapToPostResponse);
+        }
+
+        // Check like status for the current viewer
+        User currentUser = (currentUsername != null) ? userRepository.findByUsername(currentUsername).orElse(null) : null;
+        Set<String> likedPostIdsSet = new HashSet<>();
+
+        if (currentUser != null) {
+            List<String> postIds = postsSlice.getContent().stream().map(Post::getId).collect(Collectors.toList());
+            List<String> likedPostIdsList = likeRepository.findLikedPostIdsByUserAndPosts(currentUser.getId(), postIds);
+            likedPostIdsSet.addAll(likedPostIdsList);
+        }
+
+        return postsSlice.map(post -> {
+            PostResponse response = mapToPostResponse(post);
+            response.setLikedByMe(likedPostIdsSet.contains(post.getId()));
+            return response;
+        });
     }
 
     @Override

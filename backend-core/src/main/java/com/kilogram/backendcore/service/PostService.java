@@ -17,7 +17,7 @@ public interface PostService {
 
     void deletePost(String currentUsername, String postId);
 
-    Slice<PostResponse> getUserPosts(String username, int page, int size);
+    Slice<PostResponse> getUserPosts(String currentUsername, String username, int page, int size);
 
     Slice<PostResponse> getNewsFeed(String currentUsername, int page, int size);
 
