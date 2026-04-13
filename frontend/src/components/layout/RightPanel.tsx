@@ -1,11 +1,21 @@
 import { Copyright } from 'lucide-react'; // Import icon copyright
 import { useAuthStore } from '../../store/authStore';
+import { useQuery } from '@tanstack/react-query';
+import { users } from '../../features/user/api/users';
+import SuggestedUserCard from './SuggestedUserCard';
 
 /**
  * Right panel displaying current user profile and suggested accounts.
  */
 export default function RightPanel() {
   const user = useAuthStore((state) => state.user);
+
+  // Fetch suggestions
+  const { data: suggestions = [], isLoading } = useQuery({
+    queryKey: ['suggestions'],
+    queryFn: users.getSuggestions,
+    staleTime: 5 * 60 * 1000 // 5 minutes
+  });
 
   // Get current year from system
   const currentYear = new Date().getFullYear();
@@ -33,19 +43,19 @@ export default function RightPanel() {
           <button className="text-xs font-bold text-gray-900 hover:text-gray-500">Xem tất cả</button>
         </div>
 
-        {/* Mock Suggestions */}
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="h-8 w-8 rounded-full bg-gray-200" />
-              <div className="flex flex-col">
-                <span className="text-xs font-bold">user_suggested_{i}</span>
-                <span className="text-[10px] text-gray-500">Suggested for you</span>
-              </div>
-            </div>
-            <button className="text-xs font-bold text-blue-500 hover:text-blue-800">Theo dõi</button>
+        {isLoading ? (
+          <div className="flex justify-center p-4">
+            <span className="text-sm text-gray-400">Đang tải...</span>
           </div>
-        ))}
+        ) : suggestions.length === 0 ? (
+          <div className="p-2 text-sm text-gray-400">Không có gợi ý nào.</div>
+        ) : (
+          <div className="space-y-2">
+            {suggestions.map((u) => (
+              <SuggestedUserCard key={u.id} user={u} />
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Footer / Copyright Section */}

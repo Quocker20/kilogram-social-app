@@ -20,8 +20,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import tools.jackson.core.type.TypeReference;
+import tools.jackson.databind.ObjectMapper;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.redis.core.RedisTemplate;
+
 import java.util.Map;
 import java.util.Optional;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of UserService handling core user operations like registration, profile retrieval, and social interactions.
@@ -36,6 +44,11 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
     private final ImageService imageService;
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final ObjectMapper objectMapper;
+
+    private static final String SUGGESTION_CACHE_PREFIX = "suggestions:popular:";
+    private static final long CACHE_TTL_MINUTES = 30;
 
     @Override
     @Transactional
@@ -283,5 +296,50 @@ public class UserServiceImpl implements UserService {
             userRepository.incrementFollowerCount(targetUser.getId());
             return true;
         }
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UserResponse> getPopularUserSuggestions(String currentUsername) {
+        String cacheKey = SUGGESTION_CACHE_PREFIX + currentUsername;
+
+        // 1. Try to fetch from Redis Cache
+        try {
+            Object cachedData = redisTemplate.opsForValue().get(cacheKey);
+            if (cachedData != null) {
+                log.info("Returning popular user suggestions for {} from Redis cache", currentUsername);
+                return objectMapper.convertValue(cachedData, new TypeReference<List<UserResponse>>() {});
+            }
+        } catch (Exception e) {
+            log.warn("Failed to fetch suggestions from Redis for {}. Fallback to DB.", currentUsername, e);
+        }
+
+        // 2. Fallback to Database
+        log.info("Fetching popular user suggestions for {} from DB", currentUsername);
+
+        User currentUser = userRepository.findByUsernameAndIsActiveTrue(currentUsername)
+                .orElseThrow(() -> new RuntimeException("Current user not found"));
+
+        List<User> topUsers = userRepository.findSuggestions(
+                currentUser.getId(), 
+                PageRequest.of(0, 5)
+        );
+
+        // 3. Map to UserResponse
+        List<UserResponse> responses = topUsers.stream().map(u -> {
+            UserResponse response = mapToUserResponse(u);
+            response.setFollowing(false);
+            return response;
+        }).collect(Collectors.toList());
+
+        // 4. Save to Redis Cache
+        try {
+            redisTemplate.opsForValue().set(cacheKey, responses, CACHE_TTL_MINUTES, TimeUnit.MINUTES);
+            log.info("Saved popular user suggestions for {} to Redis cache", currentUsername);
+        } catch (Exception e) {
+            log.warn("Failed to save suggestions to Redis for {}", currentUsername, e);
+        }
+
+        return responses;
     }
 }

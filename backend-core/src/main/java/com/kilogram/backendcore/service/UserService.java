@@ -33,4 +33,13 @@ public interface UserService {
      * @return true if the action resulted in following, false if it resulted in unfollowing
      */
     boolean toggleFollow(String currentUsername, String targetUsername);
+
+    /**
+     * Gets a list of popular users that the current user is not already following.
+     * Results are cached in Redis.
+     *
+     * @param currentUsername the current authenticated user's username
+     * @return a list of suggested user profiles
+     */
+    List<UserResponse> getPopularUserSuggestions(String currentUsername);
 }

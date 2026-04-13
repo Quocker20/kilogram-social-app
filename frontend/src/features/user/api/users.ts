@@ -35,5 +35,10 @@ export const users = {
       params: { q: keyword },
     });
     return response.data;
+  },
+
+  getSuggestions: async (): Promise<User[]> => {
+    const response = await apiClient.get<User[]>('/users/suggestions');
+    return response.data;
   }
 };

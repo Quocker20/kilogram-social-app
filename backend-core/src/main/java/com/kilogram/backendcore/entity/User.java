@@ -8,8 +8,13 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.SQLRestriction;
+
 @Entity
-@Table(name = "users")
+@Table(name = "users", indexes = {
+        @Index(name = "idx_follower_count", columnList = "num_of_followers")
+})
+@SQLRestriction("is_active = true")
 @Getter
 @Setter
 @NoArgsConstructor

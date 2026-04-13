@@ -30,6 +30,21 @@ public class UserController {
     private final UserService userService;
 
     /**
+     * Retrieves user suggestions for the current user.
+     *
+     * @param principal the currently logged-in user
+     * @return a list of suggested user profiles
+     */
+    @GetMapping("/suggestions")
+    public ResponseEntity<java.util.List<UserResponse>> getUserSuggestions(java.security.Principal principal) {
+        String currentUsername = principal.getName();
+        log.info("REST request to get user suggestions for: {}", currentUsername);
+        
+        java.util.List<UserResponse> suggestions = userService.getPopularUserSuggestions(currentUsername);
+        return ResponseEntity.ok(suggestions);
+    }
+
+    /**
      * Handles new user registration.
      *
      * @param request valid user registration data

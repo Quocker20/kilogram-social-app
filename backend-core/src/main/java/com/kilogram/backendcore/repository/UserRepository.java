@@ -19,6 +19,11 @@ public interface UserRepository extends JpaRepository<User, String> {
 
     boolean existsByUsername(String username);
 
+    @Query("SELECT u FROM User u WHERE u.id != :currentUserId AND " +
+           "u.id NOT IN (SELECT f.following.id FROM Follow f WHERE f.follower.id = :currentUserId) " +
+           "ORDER BY u.numOfFollowers DESC")
+    List<User> findSuggestions(@Param("currentUserId") String currentUserId, org.springframework.data.domain.Pageable pageable);
+
     /**
      * Searches for active users where the keyword matches either username or display name.
      * Case-insensitive search using LOWER().
