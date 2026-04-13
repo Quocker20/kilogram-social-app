@@ -14,3 +14,10 @@ export interface AuthResponse {
   accessToken: string;
   user: User;
 }
+
+export interface RegisterRequest {
+  username: string;
+  password: string;
+  displayName: string;
+  dob: string;
+}

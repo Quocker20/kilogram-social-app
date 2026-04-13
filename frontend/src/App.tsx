@@ -9,6 +9,7 @@ import Feed from './features/feed/Feed';
 import Profile from './pages/Profile'; // Đã thêm import Profile
 import Search from './pages/Search';
 import EditProfile from './pages/EditProfile';
+import Register from './pages/Register';
 
 const PlaceholderPage = ({ title }: { title: string }) => (
   <div className="py-20 text-center font-bold text-gray-400">
@@ -24,7 +25,7 @@ export default function App() {
           {/* Auth Routes */}
           <Route element={<PublicRoute />}>
             <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<PlaceholderPage title="Đăng ký" />} />
+            <Route path="/register" element={<Register />} />
           </Route>
 
           {/* Protected App Shell */}

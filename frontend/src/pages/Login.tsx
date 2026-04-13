@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import { isAxiosError } from 'axios';
 import { loginUser } from '../features/auth/api/auth';
@@ -11,6 +11,7 @@ import { useAuthStore } from '../store/authStore';
  */
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const setAuth = useAuthStore((state) => state.setAuth);
 
   const [username, setUsername] = useState('');
@@ -18,6 +19,15 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState(location.state?.message || '');
+
+  // Clear success message on location change or state update
+  useEffect(() => {
+    if (location.state?.message) {
+      // Clear state so refresh doesn't show it again
+      window.history.replaceState({}, document.title);
+    }
+  }, [location]);
 
   // Update browser tab title on component mount
   useEffect(() => {
@@ -74,6 +84,12 @@ export default function Login() {
             Kilogram
           </h1>
         </div>
+
+        {successMessage && (
+          <div className="mt-4 rounded-xl bg-green-50 p-4 text-center border border-green-200">
+            <p className="text-sm font-semibold text-green-700">{successMessage}</p>
+          </div>
+        )}
 
         {/* Input Form Section */}
         <form onSubmit={handleLogin} className="mt-8 space-y-4">
