@@ -26,11 +26,12 @@ public interface PostRepository extends JpaRepository<Post, String> {
      * @param pageable      pagination information (infinite scroll)
      * @return a slice of Post entities
      */
-    @Query("SELECT p FROM Post p JOIN FETCH p.user JOIN Follow f ON p.user.id = f.following.id WHERE f.follower.id = :currentUserId ORDER BY p.createdAt DESC")
+    @Query("SELECT p FROM Post p JOIN FETCH p.user JOIN Follow f ON p.user.id = f.following.id WHERE f.follower.id = :currentUserId AND p.user.isActive = true ORDER BY p.createdAt DESC")
     Slice<Post> findPostsFromFollowedUsers(@Param("currentUserId") String currentUserId, Pageable pageable);
 
     @EntityGraph(attributePaths = {"user"})
-    List<Post> findByIdIn(List<String> postIds);
+    @Query("SELECT p FROM Post p WHERE p.id IN :postIds AND p.user.isActive = true")
+    List<Post> findActiveByIdIn(@Param("postIds") List<String> postIds);
 
     @Modifying
     @Query("UPDATE Post p SET p.likeCount = p.likeCount + 1 WHERE p.id = :postId")

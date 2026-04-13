@@ -81,6 +81,9 @@ public class PostServiceImpl implements PostService {
     public PostResponse getPostById(String postId) {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("Post not found"));
+        if (!post.getUser().isActive()) {
+            throw new IllegalArgumentException("Post not found");
+        }
         return mapToPostResponse(post);
     }
 
@@ -173,7 +176,7 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional(readOnly = true)
     public Slice<PostResponse> getUserPosts(String currentUsername, String username, int page, int size) {
-        User targetUser = userRepository.findByUsername(username)
+        User targetUser = userRepository.findByUsernameAndIsActiveTrue(username)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         Pageable pageable = PageRequest.of(page, size);
@@ -224,7 +227,7 @@ public class PostServiceImpl implements PostService {
     @Transactional(readOnly = true)
     public List<PostResponse> getRecommendedPosts(List<String> recommendedPostIds) {
         if (recommendedPostIds == null || recommendedPostIds.isEmpty()) return List.of();
-        List<Post> unorderedPosts = postRepository.findByIdIn(recommendedPostIds);
+        List<Post> unorderedPosts = postRepository.findActiveByIdIn(recommendedPostIds);
         Map<String, Post> postMap = unorderedPosts.stream().collect(Collectors.toMap(Post::getId, p -> p));
         return recommendedPostIds.stream().filter(postMap::containsKey).map(postMap::get).map(this::mapToPostResponse).collect(Collectors.toList());
     }

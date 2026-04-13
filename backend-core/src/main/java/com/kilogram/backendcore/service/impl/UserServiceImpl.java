@@ -69,7 +69,7 @@ public class UserServiceImpl implements UserService {
     public UserResponse getUserProfile(String currentUsername, String targetUsername) {
         log.info("Fetching profile information for username: {}", targetUsername);
 
-        User targetUser = userRepository.findByUsername(targetUsername)
+        User targetUser = userRepository.findByUsernameAndIsActiveTrue(targetUsername)
                 .orElseThrow(() -> {
                     log.error("Data retrieval error: User '{}' not found", targetUsername);
                     return new IllegalArgumentException("User not found with username: " + targetUsername);
@@ -261,7 +261,7 @@ public class UserServiceImpl implements UserService {
         User currentUser = userRepository.findByUsername(currentUsername)
                 .orElseThrow(() -> new IllegalArgumentException("Current user not found"));
 
-        User targetUser = userRepository.findByUsername(targetUsername)
+        User targetUser = userRepository.findByUsernameAndIsActiveTrue(targetUsername)
                 .orElseThrow(() -> new IllegalArgumentException("Target user not found"));
 
         Optional<Follow> existingFollow = followRepository.findByFollowerAndFollowing(currentUser, targetUser);
