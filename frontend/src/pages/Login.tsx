@@ -45,7 +45,6 @@ export default function Login() {
     try {
       const response = await loginUser({ username, password });
 
-      // FIX: Xử lý linh hoạt cho cả cấu trúc trả về lồng nhau (res.user) hoặc phẳng (từ res)
       const res: any = response;
       const userData = res.user || {
         id: res.id,

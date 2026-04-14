@@ -20,7 +20,8 @@ public interface CommentRepository extends JpaRepository<Comment, String> {
 
     /**
      * Fetch comments for a post with author details in a single query.
+     * Derived query filters by active users to maintain data integrity.
      */
     @EntityGraph(attributePaths = {"user"})
-    Slice<Comment> findByPostIdOrderByCreatedAtAsc(String postId, Pageable pageable);
+    Slice<Comment> findByPostIdAndUserIsActiveTrueOrderByCreatedAtAsc(String postId, Pageable pageable);
 }

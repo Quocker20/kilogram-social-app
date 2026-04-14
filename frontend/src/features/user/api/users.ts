@@ -40,5 +40,9 @@ export const users = {
   getSuggestions: async (): Promise<User[]> => {
     const response = await apiClient.get<User[]>('/users/suggestions');
     return response.data;
+  },
+
+  deactivateAccount: async (): Promise<void> => {
+    await apiClient.put('/users/me/deactivate');
   }
 };

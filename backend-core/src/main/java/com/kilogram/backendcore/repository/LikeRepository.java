@@ -21,7 +21,7 @@ public interface LikeRepository extends JpaRepository<Like, Like.LikeId> {
     @Query("DELETE FROM Like l WHERE l.post.id = :postId AND l.user.id = :userId")
     void deleteByPostIdAndUserId(@Param("postId") String postId, @Param("userId") String userId);
 
-    @Query("SELECT l.user FROM Like l WHERE l.post.id = :postId")
+    @Query("SELECT l.user FROM Like l WHERE l.post.id = :postId AND l.user.isActive = true")
     Slice<User> findLikersByPostId(@Param("postId") String postId, Pageable pageable);
 
     // Optimized batch query to fetch liked post IDs in a single call using IN clause

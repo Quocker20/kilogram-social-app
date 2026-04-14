@@ -80,7 +80,7 @@ public class CommentServiceImpl implements CommentService {
             throw new RuntimeException("Post not found");
         }
 
-        return commentRepository.findByPostIdOrderByCreatedAtAsc(postId, PageRequest.of(page, size))
+        return commentRepository.findByPostIdAndUserIsActiveTrueOrderByCreatedAtAsc(postId, PageRequest.of(page, size))
                 .map(this::mapToResponse);
     }
 
