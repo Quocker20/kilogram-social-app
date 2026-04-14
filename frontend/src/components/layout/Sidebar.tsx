@@ -19,11 +19,13 @@ export default function Sidebar() {
 
   return (
     <div className="fixed left-0 top-0 flex h-full w-20 flex-col border-r border-gray-200 bg-white px-3 py-8 xl:w-64">
-      <div className="mb-10 px-4">
-        <h1 className="hidden font-serif text-2xl font-bold italic xl:block">Kilogram</h1>
-        <div className="block xl:hidden">
-          <img src="/logo.svg" alt="K" className="h-8 w-8" />
-        </div>
+      <div className="mb-10 lg:pl-4 xl:px-4">
+        <Link to="/" className="flex items-center cursor-pointer hover:opacity-80 transition-opacity">
+          <h1 className="hidden font-serif text-2xl font-bold italic xl:block">Kilogram</h1>
+          <div className="block xl:hidden">
+            <img src="/logo.svg" alt="K" className="h-8 w-8 object-contain" onError={(e) => (e.currentTarget.src = '/logo.png')} />
+          </div>
+        </Link>
       </div>
 
       <nav className="flex flex-1 flex-col space-y-2">

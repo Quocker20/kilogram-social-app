@@ -4,6 +4,8 @@ import { useQuery } from '@tanstack/react-query';
 import { users } from '../../features/user/api/users';
 import SuggestedUserCard from './SuggestedUserCard';
 
+import { Link } from 'react-router-dom';
+
 /**
  * Right panel displaying current user profile and suggested accounts.
  */
@@ -23,7 +25,7 @@ export default function RightPanel() {
   return (
     <div className="hidden w-80 flex-col space-y-6 py-8 pl-8 lg:flex">
       {/* Mini Profile */}
-      <div className="flex items-center space-x-4">
+      <Link to={`/${user?.username}`} className="flex items-center space-x-4 hover:opacity-80 transition-opacity">
         <div className="h-12 w-12 overflow-hidden rounded-full border border-gray-200 bg-gray-100">
           <img
             src={user?.avatarUrl || `https://ui-avatars.com/api/?name=${user?.username}`}
@@ -34,7 +36,7 @@ export default function RightPanel() {
           <span className="text-sm font-bold text-gray-900">{user?.username}</span>
           <span className="text-sm text-gray-500">{user?.displayName}</span>
         </div>
-      </div>
+      </Link>
 
       {/* Suggestions Placeholder */}
       <div className="space-y-4">

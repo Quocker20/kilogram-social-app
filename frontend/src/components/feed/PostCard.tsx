@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Heart, MessageCircle, Bookmark, MoreHorizontal, ChevronLeft, ChevronRight, Edit2, Trash2 } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { likePostApi, unlikePostApi } from '../../features/post/api/interactions';
@@ -96,7 +97,7 @@ export default function PostCard({ post }: PostCardProps) {
   return (
     <article className="mb-8 w-full rounded-xl border border-gray-200 bg-white sm:max-w-xl relative">
       <div className="flex items-center justify-between p-3 sm:p-4">
-        <div className="flex cursor-pointer items-center space-x-3">
+        <Link to={`/${post.author.username}`} className="flex cursor-pointer items-center space-x-3 hover:opacity-80">
           <div className="h-8 w-8 overflow-hidden rounded-full border border-gray-200 bg-gray-100 sm:h-10 sm:w-10">
             <img
               src={post.author.avatarUrl || `https://ui-avatars.com/api/?name=${post.author.username}&background=random`}
@@ -105,7 +106,7 @@ export default function PostCard({ post }: PostCardProps) {
             />
           </div>
           <p className="text-sm font-semibold text-gray-900">{post.author.username}</p>
-        </div>
+        </Link>
 
         <div className="relative" ref={menuRef}>
           <button
@@ -187,7 +188,9 @@ export default function PostCard({ post }: PostCardProps) {
       <div className="px-4 pb-4">
         <p className="mb-1 text-sm font-semibold text-gray-900">{likeCount.toLocaleString()} likes</p>
         <div className="text-sm">
-          <span className="mr-2 font-semibold text-gray-900">{post.author.username}</span>
+          <Link to={`/${post.author.username}`} className="mr-2 font-semibold text-gray-900 hover:opacity-80">
+            {post.author.username}
+          </Link>
           <span className="text-gray-800">{post.content}</span>
         </div>
         <CommentSection postId={post.id} initialCommentCount={post.commentCount} postAuthorUsername={post.author.username} />

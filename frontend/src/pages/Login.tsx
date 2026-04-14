@@ -45,15 +45,21 @@ export default function Login() {
     try {
       const response = await loginUser({ username, password });
 
-      // FIX: Check if 'user' object exists in response, otherwise use the response itself as user data
-      const userData = response.user || {
-        id: response.id,
-        username: response.username,
-        displayName: response.displayName,
-        avatarUrl: response.avatarUrl
+      // FIX: Xử lý linh hoạt cho cả cấu trúc trả về lồng nhau (res.user) hoặc phẳng (từ res)
+      const res: any = response;
+      const userData = res.user || {
+        id: res.id,
+        username: res.username,
+        displayName: res.displayName,
+        avatarUrl: res.avatarUrl,
+        bio: res.bio,
+        numOfFollowers: res.numOfFollowers || 0,
+        numOfFollowing: res.numOfFollowing || 0,
+        postCount: res.postCount || 0,
+        isFollowing: res.isFollowing || false
       };
 
-      const token = response.accessToken || response.token;
+      const token = res.accessToken || res.token;
 
       if (!userData || !token) {
         throw new Error('Dữ liệu trả về từ máy chủ không hợp lệ.');
@@ -62,7 +68,13 @@ export default function Login() {
       setAuth(userData, token);
       navigate('/', { replace: true });
     } catch (err) {
-      // ... (phần catch giữ nguyên)
+      if (isAxiosError(err)) {
+        setError(err.response?.data?.message || 'Tài khoản hoặc mật khẩu không chính xác. Vui lòng thử lại.');
+      } else if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('Đã xảy ra lỗi không xác định.');
+      }
     } finally {
       setIsLoading(false);
     }
