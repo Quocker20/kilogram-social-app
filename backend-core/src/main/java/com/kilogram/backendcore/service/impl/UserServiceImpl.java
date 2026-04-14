@@ -23,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.ObjectMapper;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.data.redis.core.RedisTemplate;
 
 import java.util.Map;
@@ -341,5 +342,25 @@ public class UserServiceImpl implements UserService {
         }
 
         return responses;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Slice<UserResponse> getFollowers(String targetUsername, int page, int size) {
+        if (!userRepository.existsByUsername(targetUsername)) {
+            throw new IllegalArgumentException("User not found");
+        }
+        return followRepository.findFollowersByFollowingUsername(targetUsername, PageRequest.of(page, size))
+                .map(this::mapToUserResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Slice<UserResponse> getFollowing(String targetUsername, int page, int size) {
+        if (!userRepository.existsByUsername(targetUsername)) {
+            throw new IllegalArgumentException("User not found");
+        }
+        return followRepository.findFollowingByFollowerUsername(targetUsername, PageRequest.of(page, size))
+                .map(this::mapToUserResponse);
     }
 }

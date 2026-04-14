@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { X, Heart, MessageCircle, Bookmark, ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
 import { useModalStore } from '../../store/modalStore';
-import { likePostApi, unlikePostApi } from '../../features/post/api/interactions';
+import { likePostApi, unlikePostApi, getPostLikersApi } from '../../features/post/api/interactions';
 import CommentSection from '../feed/CommentSection';
+import UserListModal from '../common/UserListModal';
 
 export default function PostDetailModal() {
   const { isPostDetailOpen, selectedPost: post, closePostDetail } = useModalStore();
@@ -11,6 +12,7 @@ export default function PostDetailModal() {
   const [likeCount, setLikeCount] = useState(0);
   const [isLiking, setIsLiking] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [isLikersModalOpen, setIsLikersModalOpen] = useState(false);
 
   useEffect(() => {
     if (post) {
@@ -129,10 +131,23 @@ export default function PostDetailModal() {
               </div>
               <Bookmark size={24} className="text-gray-900" />
             </div>
-            <p className="text-sm font-semibold">{likeCount.toLocaleString()} likes</p>
+            <button
+              onClick={() => setIsLikersModalOpen(true)}
+              className="text-sm font-semibold text-gray-900 hover:opacity-70 focus:outline-none"
+            >
+              {likeCount.toLocaleString()} likes
+            </button>
           </div>
         </div>
       </div>
+
+      <UserListModal
+        isOpen={isLikersModalOpen}
+        onClose={() => setIsLikersModalOpen(false)}
+        title="Likes"
+        queryKey={post ? ['likers', post.id] : ['likers']}
+        queryFn={() => getPostLikersApi(post!.id)}
+      />
     </div>
   );
 }

@@ -10,6 +10,7 @@ import com.kilogram.backendcore.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -39,7 +40,7 @@ public class UserController {
     public ResponseEntity<java.util.List<UserResponse>> getUserSuggestions(java.security.Principal principal) {
         String currentUsername = principal.getName();
         log.info("REST request to get user suggestions for: {}", currentUsername);
-        
+
         java.util.List<UserResponse> suggestions = userService.getPopularUserSuggestions(currentUsername);
         return ResponseEntity.ok(suggestions);
     }
@@ -79,22 +80,53 @@ public class UserController {
      */
     @GetMapping("/{username}")
     public ResponseEntity<UserResponse> getUserProfile(
-            java.security.Principal principal, 
+            java.security.Principal principal,
             @PathVariable String username) {
-            
+
         String currentUsername = principal != null ? principal.getName() : null;
         log.info("REST request to get profile for user {} by {}", username, currentUsername);
-        
+
         UserResponse response = userService.getUserProfile(currentUsername, username);
         return ResponseEntity.ok(response);
     }
 
     /**
-     * Updates the currently authenticated user's profile details using multipart/form-data.
+     * Retrieves the list of followers for a specific user.
+     *
+     * @param username the target username
+     * @return a pageable slice of followers
+     */
+    @GetMapping("/{username}/followers")
+    public ResponseEntity<Slice<UserResponse>> getFollowers(
+            @PathVariable String username,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        log.info("REST request to get followers for user: {}", username);
+        return ResponseEntity.ok(userService.getFollowers(username, page, size));
+    }
+
+    /**
+     * Retrieves the list of users that a specific user is following.
+     *
+     * @param username the target username
+     * @return a pageable slice of following users
+     */
+    @GetMapping("/{username}/following")
+    public ResponseEntity<Slice<UserResponse>> getFollowing(
+            @PathVariable String username,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        log.info("REST request to get following for user: {}", username);
+        return ResponseEntity.ok(userService.getFollowing(username, page, size));
+    }
+
+    /**
+     * Updates the currently authenticated user's profile details using
+     * multipart/form-data.
      *
      * @param principal the currently logged-in user injected by Spring Security
-     * @param request the profile data to update (as JSON part)
-     * @param avatar the avatar image file (optional)
+     * @param request   the profile data to update (as JSON part)
+     * @param avatar    the avatar image file (optional)
      * @return the updated user profile
      */
     @PutMapping(value = "/me", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -114,7 +146,7 @@ public class UserController {
      * Changes the password of the currently authenticated user.
      *
      * @param principal the currently logged-in user injected by Spring Security
-     * @param request the password change payload
+     * @param request   the password change payload
      * @return HTTP 200 OK if successful
      */
     @PutMapping("/password")

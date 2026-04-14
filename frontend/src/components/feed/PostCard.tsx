@@ -2,9 +2,10 @@ import { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart, MessageCircle, Bookmark, MoreHorizontal, ChevronLeft, ChevronRight, Edit2, Trash2 } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { likePostApi, unlikePostApi } from '../../features/post/api/interactions';
+import { likePostApi, unlikePostApi, getPostLikersApi } from '../../features/post/api/interactions';
 import { posts } from '../../features/post/api/posts';
 import CommentSection from './CommentSection';
+import UserListModal from '../common/UserListModal';
 import { useAuthStore } from '../../store/authStore';
 import { useModalStore } from '../../store/modalStore';
 import type { Post } from '../../types';
@@ -23,6 +24,7 @@ export default function PostCard({ post }: PostCardProps) {
   const [isLiking, setIsLiking] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLikersModalOpen, setIsLikersModalOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const hasImages = post.images && post.images.length > 0;
@@ -186,7 +188,12 @@ export default function PostCard({ post }: PostCardProps) {
       </div>
 
       <div className="px-4 pb-4">
-        <p className="mb-1 text-sm font-semibold text-gray-900">{likeCount.toLocaleString()} likes</p>
+        <button
+          onClick={() => setIsLikersModalOpen(true)}
+          className="mb-1 text-sm font-semibold text-gray-900 hover:opacity-70 focus:outline-none"
+        >
+          {likeCount.toLocaleString()} likes
+        </button>
         <div className="text-sm">
           <Link to={`/${post.author.username}`} className="mr-2 font-semibold text-gray-900 hover:opacity-80">
             {post.author.username}
@@ -195,6 +202,14 @@ export default function PostCard({ post }: PostCardProps) {
         </div>
         <CommentSection postId={post.id} initialCommentCount={post.commentCount} postAuthorUsername={post.author.username} />
       </div>
+
+      <UserListModal
+        isOpen={isLikersModalOpen}
+        onClose={() => setIsLikersModalOpen(false)}
+        title="Likes"
+        queryKey={['likers', post.id]}
+        queryFn={() => getPostLikersApi(post.id)}
+      />
     </article>
   );
 }

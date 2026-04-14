@@ -1,5 +1,5 @@
 import { apiClient } from '../../../lib/axios';
-import type { Comment } from '../../../types';
+import type { Comment, User } from '../../../types';
 import type { SliceResponse } from '../../feed/api/feed';
 
 export const likePostApi = async (postId: string): Promise<void> => {
@@ -8,6 +8,13 @@ export const likePostApi = async (postId: string): Promise<void> => {
 
 export const unlikePostApi = async (postId: string): Promise<void> => {
   await apiClient.delete(`/posts/${postId}/likes`);
+};
+
+export const getPostLikersApi = async (postId: string, page = 0, size = 20): Promise<SliceResponse<User>> => {
+  const response = await apiClient.get<SliceResponse<User>>(`/posts/${postId}/likes`, {
+    params: { page, size },
+  });
+  return response.data;
 };
 
 export const getPostCommentsApi = async (postId: string, page = 0, size = 10): Promise<SliceResponse<Comment>> => {

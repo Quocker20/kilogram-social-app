@@ -1,5 +1,6 @@
 import { apiClient } from '../../../lib/axios';
 import type { User } from '../../../types';
+import type { SliceResponse } from '../../feed/api/feed';
 
 export const users = {
   getProfile: async (username: string): Promise<User> => {
@@ -44,5 +45,19 @@ export const users = {
 
   deactivateAccount: async (): Promise<void> => {
     await apiClient.put('/users/me/deactivate');
+  },
+
+  getFollowers: async (username: string, page = 0, size = 20): Promise<SliceResponse<User>> => {
+    const response = await apiClient.get<SliceResponse<User>>(`/users/${username}/followers`, {
+      params: { page, size },
+    });
+    return response.data;
+  },
+
+  getFollowing: async (username: string, page = 0, size = 20): Promise<SliceResponse<User>> => {
+    const response = await apiClient.get<SliceResponse<User>>(`/users/${username}/following`, {
+      params: { page, size },
+    });
+    return response.data;
   }
 };

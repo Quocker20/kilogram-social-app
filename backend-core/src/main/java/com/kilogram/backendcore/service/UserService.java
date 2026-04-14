@@ -6,6 +6,7 @@ import com.kilogram.backendcore.dto.request.UserRegistrationRequest;
 import com.kilogram.backendcore.dto.request.LoginRequest;
 import com.kilogram.backendcore.dto.response.AuthResponse;
 import com.kilogram.backendcore.dto.response.UserResponse;
+import org.springframework.data.domain.Slice;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -42,4 +43,8 @@ public interface UserService {
      * @return a list of suggested user profiles
      */
     List<UserResponse> getPopularUserSuggestions(String currentUsername);
+
+    Slice<UserResponse> getFollowers(String targetUsername, int page, int size);
+
+    Slice<UserResponse> getFollowing(String targetUsername, int page, int size);
 }
