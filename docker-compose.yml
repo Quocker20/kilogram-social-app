@@ -4,7 +4,7 @@ services:
     container_name: kilogram-mysql
     restart: always
     env_file:
-      - kilogram.env
+      - .env
     environment:
       MYSQL_DATABASE: kilogram_db
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-admin}
@@ -14,6 +14,11 @@ services:
       - kilogram_db_data:/var/lib/mysql
     networks:
       - kilogram-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7-alpine
@@ -21,6 +26,8 @@ services:
     restart: always
     ports:
       - "6379:6379"
+    volumes:
+      - kilogram_redis_data:/data
     networks:
       - kilogram-network
 
@@ -30,3 +37,4 @@ networks:
 
 volumes:
   kilogram_db_data:
+  kilogram_redis_data:
