@@ -15,8 +15,9 @@ import java.util.List;
 @Repository
 public interface PostRepository extends JpaRepository<Post, String> {
 
+    @Query("SELECT p FROM Post p WHERE p.user.id = :userId AND p.user.isActive = true ORDER BY p.createdAt DESC")
     @EntityGraph(attributePaths = {"user"})
-    Slice<Post> findByUserIdOrderByCreatedAtDesc(String userId, Pageable pageable);
+    Slice<Post> findByUserIdOrderByCreatedAtDesc(@Param("userId") String userId, Pageable pageable);
 
     /**
      * Retrieves a slice of posts from users that the current user follows.
