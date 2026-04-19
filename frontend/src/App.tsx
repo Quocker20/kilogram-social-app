@@ -6,10 +6,12 @@ import { PublicRoute } from './routes/PublicRoute';
 import MainLayout from './layouts/MainLayout';
 import Login from './pages/Login';
 import Feed from './features/feed/Feed';
-import Profile from './pages/Profile'; // Đã thêm import Profile
+import Profile from './pages/Profile';
 import Search from './pages/Search';
 import EditProfile from './pages/EditProfile';
 import Register from './pages/Register';
+import Notifications from './pages/Notifications';
+import PostDetailModal from './components/post/PostDetailModal';
 
 const PlaceholderPage = ({ title }: { title: string }) => (
   <div className="py-20 text-center font-bold text-gray-400">
@@ -36,7 +38,7 @@ export default function App() {
               <Route path="/messages" element={<PlaceholderPage title="Tin nhắn" />} />
               <Route path="/search" element={<Search />} />
               <Route path="/accounts/edit" element={<EditProfile />} />
-              <Route path="/notifications" element={<PlaceholderPage title="Thông báo" />} />
+              <Route path="/notifications" element={<Notifications />} />
               <Route path="/create" element={<PlaceholderPage title="Tạo bài viết" />} />
 
               {/* ĐÃ SỬA: Định tuyến động để bắt username từ URL */}
@@ -47,6 +49,9 @@ export default function App() {
           {/* Fallback to Home if route not found */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+
+        {/* Global modals — rendered outside route tree to persist across navigation */}
+        <PostDetailModal />
       </BrowserRouter>
     </QueryClientProvider>
   );

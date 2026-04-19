@@ -5,6 +5,13 @@
     <link rel="icon" type="image/svg+xml" href="/logo.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Kilogram</title>
+    <script>
+      /**
+       * Fix 'global is not defined' error.
+       * sockjs-client expects a Node.js-style 'global' object which Vite/modern browsers don't provide.
+       */
+      window.global = window;
+    </script>
   </head>
   <body>
     <div id="root"></div>

@@ -2,11 +2,13 @@ import { Home, Compass, MessageCircle, Search, Heart, PlusSquare, User } from 'l
 import { Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { useModalStore } from '../../store/modalStore';
+import { useNotificationStore } from '../../store/notificationStore';
 
 export default function Sidebar() {
   const location = useLocation();
   const { user: currentUser, logout } = useAuthStore();
   const openPostModal = useModalStore((state) => state.openPostModal);
+  const unreadCount = useNotificationStore((state) => state.unreadCount);
 
   const menuItems = [
     { icon: Home, label: 'Trang chủ', path: '/' },
@@ -32,6 +34,8 @@ export default function Sidebar() {
         {menuItems.map((item) => {
           const Icon = item.icon;
           const isActive = location.pathname === item.path;
+          const isNotification = item.path === '/notifications';
+
           return (
             <Link
               key={item.label}
@@ -40,7 +44,15 @@ export default function Sidebar() {
                 isActive ? 'font-bold' : 'font-medium'
               }`}
             >
-              <Icon size={26} strokeWidth={isActive ? 2.5 : 2} />
+              {/* Notification icon với badge */}
+              <div className="relative">
+                <Icon size={26} strokeWidth={isActive ? 2.5 : 2} />
+                {isNotification && unreadCount > 0 && (
+                  <span className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold leading-none text-white shadow-sm">
+                    {unreadCount > 99 ? '99+' : unreadCount}
+                  </span>
+                )}
+              </div>
               <span className="hidden text-base xl:block">{item.label}</span>
             </Link>
           );

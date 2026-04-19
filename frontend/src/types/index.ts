@@ -48,3 +48,16 @@ export interface Slice<T> {
   size: number;
   number: number;
 }
+
+export interface NotificationItem {
+  id: string;
+  type: 'NEW_POST' | 'LIKE' | 'COMMENT';
+  actorUsername: string;
+  actorDisplayName: string;
+  actorAvatarUrl: string | null;
+  message: string;
+  postId: string;
+  postThumbnailUrl: string | null;
+  isRead: boolean;
+  createdAt: string;
+}
