@@ -16,7 +16,7 @@ public class AdultValidator implements ConstraintValidator<Adult, LocalDate> {
     @Override
     public boolean isValid(LocalDate dob, ConstraintValidatorContext context) {
         if (dob == null) return false;
-        // Tính khoảng cách thời gian từ dob đến hôm nay
+        // Calculate the time gap from dob to today
         return Period.between(dob, LocalDate.now()).getYears() >= minAge;
     }
 }

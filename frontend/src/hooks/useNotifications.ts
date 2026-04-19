@@ -6,17 +6,17 @@ import { getUnreadCountApi } from '../features/notification/api/notificationApi'
 import type { NotificationItem } from '../types';
 
 /**
- * Hook chuyên biệt cho thông báo.
- * Kết nối STOMP và subscribe vào topic notifications của user hiện tại.
+ * Specific hook for notifications.
+ * Connects to STOMP and subscribes to the current user's notifications topic.
  *
- * Mount một lần trong MainLayout — tất cả trang trong app đều nhận thông báo realtime.
+ * Mount once in MainLayout - all pages in the app will receive real-time notifications.
  */
 export function useNotifications() {
   const user = useAuthStore((state) => state.user);
   const addNotification = useNotificationStore((state) => state.addNotification);
   const setUnreadCount = useNotificationStore((state) => state.setUnreadCount);
 
-  // Fetch unread count ban đầu khi user đăng nhập để khởi tạo badge
+  // Fetch initial unread count when user logs in to initialize the badge
   useEffect(() => {
     if (!user) return;
     getUnreadCountApi()
@@ -24,7 +24,7 @@ export function useNotifications() {
       .catch(() => {/* silent fail */});
   }, [user, setUnreadCount]);
 
-  // Subscribe vào WebSocket topic thông báo của user
+  // Subscribe to user's WebSocket notification topic
   useStompClient(
     user
       ? [
@@ -41,6 +41,6 @@ export function useNotifications() {
           },
         ]
       : [],
-    !!user // chỉ kết nối khi có user đăng nhập
+    !!user // only connect when user is logged in
   );
 }

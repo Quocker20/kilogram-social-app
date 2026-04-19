@@ -7,8 +7,8 @@ interface NotificationToastProps {
 }
 
 /**
- * Toast đơn giản hiện ở góc trên phải khi nhận thông báo realtime.
- * Tự ẩn sau 4 giây. Không cần tương tác.
+ * Simple toast displayed in the top right corner when receiving a realtime notification.
+ * Automatically hide after 4 seconds. No interaction required.
  */
 export default function NotificationToast({ notification, onDismiss }: NotificationToastProps) {
   const [visible, setVisible] = useState(false);
@@ -18,7 +18,7 @@ export default function NotificationToast({ notification, onDismiss }: Notificat
     setVisible(true);
     const timer = setTimeout(() => {
       setVisible(false);
-      setTimeout(onDismiss, 300); // chờ animation out
+      setTimeout(onDismiss, 300); // wait for animation out
     }, 4000);
     return () => clearTimeout(timer);
   }, [notification, onDismiss]);
@@ -38,7 +38,7 @@ export default function NotificationToast({ notification, onDismiss }: Notificat
       }`}
       style={{ maxWidth: '320px', minWidth: '260px' }}
     >
-      {/* Avatar */}
+      {/* Avatar & Type Icon */}
       <div className="relative shrink-0">
         <img
           src={
@@ -55,13 +55,13 @@ export default function NotificationToast({ notification, onDismiss }: Notificat
       <div className="flex-1 min-w-0">
         <p className="text-sm text-gray-800 leading-snug line-clamp-2">
           <span className="font-semibold">{notification.actorDisplayName || notification.actorUsername}</span>{' '}
-          {notification.type === 'NEW_POST' && 'vừa đăng một bài viết mới'}
-          {notification.type === 'LIKE' && 'đã thích bài viết của bạn'}
-          {notification.type === 'COMMENT' && 'đã bình luận về bài viết của bạn'}
+          {notification.type === 'NEW_POST' && 'just posted a new update'}
+          {notification.type === 'LIKE' && 'liked your post'}
+          {notification.type === 'COMMENT' && 'commented on your post'}
         </p>
       </div>
 
-      {/* Thumbnail */}
+      {/* Optional Thumbnail */}
       {notification.postThumbnailUrl && (
         <img
           src={notification.postThumbnailUrl}

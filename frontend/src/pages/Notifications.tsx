@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useInfiniteQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@tanstack/react-query';
 import { Heart, MessageCircle, Image } from 'lucide-react';
 import { useNotificationStore } from '../store/notificationStore';
 import { getNotificationsApi, markAllReadApi } from '../features/notification/api/notificationApi';
@@ -36,7 +36,7 @@ function NotificationRow({
         !notification.isRead ? 'bg-blue-50/60' : ''
       }`}
     >
-      {/* Avatar + type icon */}
+      {/* Avatar + Type Icon */}
       <div className="relative shrink-0">
         <img
           src={
@@ -55,7 +55,7 @@ function NotificationRow({
       <div className="flex-1 min-w-0">
         <p className="text-sm text-gray-800 leading-snug">
           <span className="font-semibold">{notification.actorDisplayName || notification.actorUsername}</span>{' '}
-          <span className="text-gray-600">{notification.message.replace(/^.+ (vừa|đã)/, '$1')}</span>
+          <span className="text-gray-600">{notification.message}</span>
         </p>
         <p className="mt-0.5 text-xs text-gray-400">{timeAgo(notification.createdAt)}</p>
       </div>
@@ -64,7 +64,7 @@ function NotificationRow({
       {notification.postThumbnailUrl ? (
         <img
           src={notification.postThumbnailUrl}
-          alt="bài viết"
+          alt="post"
           className="h-11 w-11 shrink-0 rounded-lg object-cover"
         />
       ) : (
@@ -84,7 +84,7 @@ export default function Notifications() {
   const openPostDetail = useModalStore((state) => state.openPostDetail);
   const [openingPostId, setOpeningPostId] = useState<string | null>(null);
 
-  // Đánh dấu đã đọc khi vào trang
+  // Mark as read when entering the page
   useEffect(() => {
     markAllReadApi()
       .then(() => markStoreRead())

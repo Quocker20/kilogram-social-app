@@ -30,12 +30,12 @@ public class Notification {
     @Column(length = 36, updatable = false, nullable = false)
     private String id;
 
-    /** Người nhận thông báo */
+    /** Recipient of the notification */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recipient_id", nullable = false)
     private User recipient;
 
-    /** Người thực hiện hành động (like, comment, post) */
+    /** User performing the action (like, comment, post) */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "actor_id", nullable = false)
     private User actor;
@@ -44,7 +44,7 @@ public class Notification {
     @Column(nullable = false, length = 20)
     private NotificationType type;
 
-    /** Bài viết liên quan (nullable để phòng tương lai) */
+    /** Related post (nullable for future extensions) */
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
     private Post post;

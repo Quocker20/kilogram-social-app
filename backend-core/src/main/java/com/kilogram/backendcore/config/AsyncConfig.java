@@ -8,8 +8,8 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import java.util.concurrent.Executor;
 
 /**
- * Cấu hình Spring @Async — cần thiết cho fan-out thông báo tới follower.
- * Khi đăng bài, việc notify N follower được chạy async để không block HTTP response.
+ * Spring @Async configuration — necessary for fan-out notifications to followers.
+ * When posting, notifying N followers is run asynchronously to avoid blocking the HTTP response.
  */
 @Configuration
 @EnableAsync
@@ -18,11 +18,11 @@ public class AsyncConfig {
     @Bean(name = "notificationExecutor")
     public Executor notificationExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        // Số thread luôn sẵn sàng
+        // Number of threads always ready
         executor.setCorePoolSize(5);
-        // Số thread tối đa khi tải cao
+        // Maximum number of threads under high load
         executor.setMaxPoolSize(20);
-        // Queue chứa task khi tất cả thread đều bận
+        // Queue holding tasks when all threads are busy
         executor.setQueueCapacity(500);
         executor.setThreadNamePrefix("notif-async-");
         executor.initialize();

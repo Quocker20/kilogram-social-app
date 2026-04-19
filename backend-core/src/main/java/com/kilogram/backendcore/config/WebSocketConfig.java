@@ -11,12 +11,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.simp.config.ChannelRegistration;
 
 /**
- * Cấu hình WebSocket + STOMP message broker.
+ * WebSocket + STOMP message broker configuration.
  *
- * <p>Topic naming convention dùng trong Kilogram:
+ * <p>Topic naming convention used in Kilogram:
  * <ul>
- *   <li>{@code /user/{username}/topic/notifications} — thông báo (feature này)</li>
- *   <li>{@code /user/{username}/topic/messages}      — chat realtime (feature tương lai)</li>
+ *   <li>{@code /user/{username}/topic/notifications} — notifications</li>
+ *   <li>{@code /user/{username}/topic/messages}      — realtime chat</li>
  * </ul>
  * </p>
  */
@@ -29,16 +29,16 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        // Prefix để client gửi message đến @MessageMapping handlers trên server
+        // Prefix for clients to send messages to @MessageMapping handlers on the server
         registry.setApplicationDestinationPrefixes("/app");
 
-        // Prefix cho server push (in-memory broker)
-        // /topic/* — broadcast (nhiều subscriber)
+        // Prefix for server push (in-memory broker)
+        // /topic/* — broadcast (multiple subscribers)
         // /queue/*  — point-to-point
         registry.enableSimpleBroker("/topic", "/queue");
 
-        // Prefix cho user-specific destinations
-        // /user/quocker20/topic/notifications → chỉ gửi cho quocker20
+        // Prefix for user-specific destinations
+        // /user/quocker20/topic/notifications → only send to quocker20
         registry.setUserDestinationPrefix("/user");
     }
 
@@ -47,13 +47,13 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         registry
                 .addEndpoint("/ws")
                 .setAllowedOrigins("http://localhost:5173")
-                // SockJS fallback cho trường hợp WebSocket bị block
+                // SockJS fallback in case WebSocket is blocked
                 .withSockJS();
     }
 
     @Override
     public void configureClientInboundChannel(ChannelRegistration registration) {
-        // Đăng ký JWT interceptor — validate token trong STOMP CONNECT frame
+        // Register JWT interceptor — validate token in STOMP CONNECT frame
         registration.interceptors(webSocketAuthInterceptor);
     }
 }

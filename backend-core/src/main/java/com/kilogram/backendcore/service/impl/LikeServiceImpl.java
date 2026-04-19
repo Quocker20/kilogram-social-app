@@ -47,7 +47,7 @@ public class LikeServiceImpl implements LikeService {
 
         postRepository.incrementLikeCount(postId);
 
-        // Thông báo tới chủ bài viết
+        // Notify the post owner
         postRepository.findOwnerUsernameById(postId).ifPresent(ownerUsername ->
                 notificationService.createAndSend(currentUsername, ownerUsername, NotificationType.LIKE, postId));
 

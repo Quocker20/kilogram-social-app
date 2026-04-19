@@ -19,12 +19,12 @@ public class NotificationResponse {
     private String actorDisplayName;
     private String actorAvatarUrl;
 
-    /** Nội dung thông báo đã được format sẵn, VD: "quocker20 đã thích bài viết của bạn" */
+    /** Pre-formatted notification content, e.g.: "quocker20 liked your post" */
     private String message;
 
     private String postId;
 
-    /** URL ảnh đầu tiên của bài viết — dùng làm thumbnail trong danh sách thông báo */
+    /** URL of the first image of the post — used as thumbnail in the notification list */
     private String postThumbnailUrl;
 
     private boolean isRead;

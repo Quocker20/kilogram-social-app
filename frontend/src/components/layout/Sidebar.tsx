@@ -3,12 +3,14 @@ import { Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { useModalStore } from '../../store/modalStore';
 import { useNotificationStore } from '../../store/notificationStore';
+import { useChatStore } from '../../store/chatStore';
 
 export default function Sidebar() {
   const location = useLocation();
   const { user: currentUser, logout } = useAuthStore();
   const openPostModal = useModalStore((state) => state.openPostModal);
   const unreadCount = useNotificationStore((state) => state.unreadCount);
+  const hasUnreadMessages = useChatStore((state) => state.hasUnreadMessages);
 
   const menuItems = [
     { icon: Home, label: 'Trang chủ', path: '/' },
@@ -44,13 +46,16 @@ export default function Sidebar() {
                 isActive ? 'font-bold' : 'font-medium'
               }`}
             >
-              {/* Notification icon với badge */}
+              {/* Notification icon with badge */}
               <div className="relative">
                 <Icon size={26} strokeWidth={isActive ? 2.5 : 2} />
                 {isNotification && unreadCount > 0 && (
                   <span className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold leading-none text-white shadow-sm">
                     {unreadCount > 99 ? '99+' : unreadCount}
                   </span>
+                )}
+                {item.path === '/messages' && hasUnreadMessages && (
+                  <span className="absolute right-0 top-0 h-2.5 w-2.5 rounded-full bg-red-500 border-2 border-white shadow-sm"></span>
                 )}
               </div>
               <span className="hidden text-base xl:block">{item.label}</span>

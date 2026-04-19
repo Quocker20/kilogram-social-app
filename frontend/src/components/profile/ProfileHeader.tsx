@@ -1,8 +1,10 @@
 import { useState } from 'react';
 import { useAuthStore } from '../../store/authStore';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { users} from '../../features/user/api/users';
+import { getConversationWithUser } from '../../features/chat/api/chat.api';
+import { useChatStore } from '../../store/chatStore';
 import UserListModal from '../common/UserListModal';
 import type { User } from '../../types';
 
@@ -18,6 +20,19 @@ export default function ProfileHeader({ profile }: ProfileHeaderProps) {
   const [isFollowingModalOpen, setIsFollowingModalOpen] = useState(false);
 
   const isMe = currentUser?.username === profile.username;
+  const navigate = useNavigate();
+  const { addOrUpdateConversation, setActiveConversation } = useChatStore();
+
+  const handleMessageClick = async () => {
+    try {
+      const conv = await getConversationWithUser(profile.username);
+      addOrUpdateConversation(conv);
+      setActiveConversation(conv);
+      navigate('/messages');
+    } catch (error) {
+      console.error('Failed to init conversation', error);
+    }
+  };
 
   const followMutation = useMutation({
     mutationFn: () => users.toggleFollow(profile.username),
@@ -47,17 +62,25 @@ export default function ProfileHeader({ profile }: ProfileHeaderProps) {
                   Edit Profile
                 </Link>
               ) : (
-                <button
-                  onClick={() => followMutation.mutate()}
-                  disabled={followMutation.isPending}
-                  className={`px-6 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
-                    profile.isFollowing
-                      ? 'bg-gray-100 text-black hover:bg-gray-200'
-                      : 'bg-blue-500 text-white hover:bg-blue-600'
-                  }`}
-                >
-                  {profile.isFollowing ? 'Following' : 'Follow'}
-                </button>
+                <>
+                  <button
+                    onClick={() => followMutation.mutate()}
+                    disabled={followMutation.isPending}
+                    className={`px-6 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
+                      profile.isFollowing
+                        ? 'bg-gray-100 text-black hover:bg-gray-200'
+                        : 'bg-blue-500 text-white hover:bg-blue-600'
+                    }`}
+                  >
+                    {profile.isFollowing ? 'Following' : 'Follow'}
+                  </button>
+                  <button
+                    onClick={handleMessageClick}
+                    className="px-6 py-1.5 border border-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-colors bg-white text-black"
+                  >
+                    Message
+                  </button>
+                </>
               )}
             </div>
           </div>

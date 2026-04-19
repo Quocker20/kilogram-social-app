@@ -11,11 +11,11 @@ interface Subscription {
 const WS_URL = import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:8080';
 
 /**
- * Hook tái sử dụng cho WebSocket + STOMP.
- * Thiết kế để dùng chung cho cả notifications và chat (tương lai).
+ * Reusable hook for WebSocket + STOMP.
+ * Designed to be shared for both notifications and chat.
  *
- * @param subscriptions  Danh sách topic cần subscribe và callback khi nhận message
- * @param enabled        Chỉ kết nối khi true (mặc định: khi có token)
+ * @param subscriptions List of topics to subscribe to and callbacks upon message receipt
+ * @param enabled Connect only when true (default: when token exists)
  *
  * @example
  * // Notifications
@@ -35,7 +35,7 @@ export function useStompClient(subscriptions: Subscription[], enabled = true) {
   const clientRef = useRef<Client | null>(null);
   const subscriptionsRef = useRef<StompSubscription[]>([]);
 
-  // Wrap subscriptions trong ref để callback không stale
+  // Wrap subscriptions in a ref so the callback does not become stale
   const subscriptionsConfigRef = useRef(subscriptions);
   subscriptionsConfigRef.current = subscriptions;
 
@@ -43,24 +43,24 @@ export function useStompClient(subscriptions: Subscription[], enabled = true) {
     if (!token || !enabled) return;
 
     const client = new Client({
-      // SockJS factory thay vì bare WebSocket URL
+      // Use SockJS factory instead of bare WebSocket URL
       webSocketFactory: () => new SockJS(`${WS_URL}/ws`),
 
-      // Gửi JWT trong STOMP CONNECT frame header
+      // Send JWT in STOMP CONNECT frame header
       connectHeaders: {
         Authorization: `Bearer ${token}`,
       },
 
-      // Heartbeat để giữ kết nối sống
+      // Heartbeat to keep connection alive
       heartbeatIncoming: 4000,
       heartbeatOutgoing: 4000,
 
-      // Tự động reconnect sau 5 giây khi mất kết nối
+      // Auto reconnect after 5 seconds on disconnect
       reconnectDelay: 5000,
 
       onConnect: () => {
         console.debug('[STOMP] Connected');
-        // Subscribe tất cả topic được truyền vào
+        // Subscribe to all provided topics
         subscriptionsRef.current = subscriptionsConfigRef.current.map((sub) =>
           client.subscribe(sub.destination, sub.callback)
         );
@@ -83,7 +83,7 @@ export function useStompClient(subscriptions: Subscription[], enabled = true) {
     connect();
 
     return () => {
-      // Cleanup: unsubscribe và ngắt kết nối khi component unmount
+      // Cleanup: unsubscribe and disconnect on component unmount
       subscriptionsRef.current.forEach((sub) => sub.unsubscribe());
       clientRef.current?.deactivate();
       clientRef.current = null;

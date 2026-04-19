@@ -56,7 +56,7 @@ export default function Register() {
 
       setSuccess(true);
       
-      // Chuyển về trang login sau 2 giây
+      // Redirect to login page after 2 seconds
       setTimeout(() => {
         navigate('/login', { state: { message: 'Đăng ký thành công' }, replace: true });
       }, 2000);

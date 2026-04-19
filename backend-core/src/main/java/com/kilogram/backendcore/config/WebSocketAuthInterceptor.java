@@ -16,13 +16,13 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
 /**
- * STOMP ChannelInterceptor — validate JWT trong CONNECT frame.
+ * STOMP ChannelInterceptor — validates JWT in the CONNECT frame.
  *
- * <p>Vì WebSocket sau khi handshake không còn HTTP headers nữa,
- * client gửi JWT trong STOMP CONNECT frame header "Authorization".
- * Interceptor này chặn CONNECT frame, validate token, và set Authentication
- * vào StompHeaderAccessor để Spring biết user nào đang kết nối
- * (cần thiết cho routing {@code /user/*} destinations).</p>
+ * <p>Because WebSocket does not retain HTTP headers after the handshake,
+ * clients send JWT in the STOMP CONNECT frame header "Authorization".
+ * This interceptor intercepts the CONNECT frame, validates the token, and sets the Authentication
+ * in the StompHeaderAccessor so Spring knows which user is connecting
+ * (necessary for routing {@code /user/*} destinations).</p>
  */
 @Component
 @RequiredArgsConstructor
@@ -53,8 +53,8 @@ public class WebSocketAuthInterceptor implements ChannelInterceptor {
                                 new UsernamePasswordAuthenticationToken(
                                         userDetails, null, userDetails.getAuthorities());
 
-                        // Set Authentication vào STOMP header accessor
-                        // Đây là cơ sở để Spring route /user/{username}/... đúng user
+                        // Set Authentication into STOMP header accessor
+                        // This serves as the basis for Spring to route /user/{username}/... to the correct user
                         accessor.setUser(authentication);
                         log.debug("WebSocket authenticated for user: {}", username);
                     }

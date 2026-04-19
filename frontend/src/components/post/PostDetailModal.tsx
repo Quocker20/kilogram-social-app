@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Heart, MessageCircle, Bookmark, ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
 import { useModalStore } from '../../store/modalStore';
 import { likePostApi, unlikePostApi, getPostLikersApi } from '../../features/post/api/interactions';

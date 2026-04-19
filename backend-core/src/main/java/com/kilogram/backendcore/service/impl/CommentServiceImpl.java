@@ -51,7 +51,7 @@ public class CommentServiceImpl implements CommentService {
         Comment savedComment = commentRepository.save(comment);
         postRepository.incrementCommentCount(postId);
 
-        // Thông báo tới chủ bài viết
+        // Notify the post owner
         postRepository.findOwnerUsernameById(postId).ifPresent(ownerUsername ->
                 notificationService.createAndSend(currentUsername, ownerUsername, NotificationType.COMMENT, postId));
 

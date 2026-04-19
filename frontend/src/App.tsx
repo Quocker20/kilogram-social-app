@@ -11,6 +11,7 @@ import Search from './pages/Search';
 import EditProfile from './pages/EditProfile';
 import Register from './pages/Register';
 import Notifications from './pages/Notifications';
+import DirectMessages from './pages/DirectMessages';
 import PostDetailModal from './components/post/PostDetailModal';
 
 const PlaceholderPage = ({ title }: { title: string }) => (
@@ -34,14 +35,14 @@ export default function App() {
           <Route element={<ProtectedRoute />}>
             <Route element={<MainLayout />}>
               <Route path="/" element={<Feed />} />
-              <Route path="/explore" element={<PlaceholderPage title="Khám phá" />} />
-              <Route path="/messages" element={<PlaceholderPage title="Tin nhắn" />} />
+              <Route path="/explore" element={<PlaceholderPage title="Explore" />} />
+              <Route path="/messages" element={<DirectMessages />} />
               <Route path="/search" element={<Search />} />
               <Route path="/accounts/edit" element={<EditProfile />} />
               <Route path="/notifications" element={<Notifications />} />
-              <Route path="/create" element={<PlaceholderPage title="Tạo bài viết" />} />
+              <Route path="/create" element={<PlaceholderPage title="Create Post" />} />
 
-              {/* ĐÃ SỬA: Định tuyến động để bắt username từ URL */}
+              {/* MODIFIED: Dynamic routing to catch username from URL */}
               <Route path="/:username" element={<Profile />} />
             </Route>
           </Route>

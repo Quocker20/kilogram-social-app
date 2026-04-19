@@ -32,8 +32,8 @@ public class NotificationServiceImpl implements NotificationService {
     private final FollowRepository followRepository;
 
     /**
-     * SimpMessagingTemplate — Spring bean tự inject, dùng để push message
-     * qua WebSocket tới user cụ thể.
+     * SimpMessagingTemplate - Spring bean auto-injected, used to push messages
+     * via WebSocket to a specific user.
      */
     private final SimpMessagingTemplate messagingTemplate;
 
@@ -45,7 +45,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional
     public void createAndSend(String actorUsername, String recipientUsername,
                               NotificationType type, String postId) {
-        // Không tự thông báo cho chính mình
+        // Do not notify oneself
         if (actorUsername.equals(recipientUsername)) return;
 
         User actor = userRepository.findByUsername(actorUsername).orElse(null);
@@ -54,7 +54,7 @@ public class NotificationServiceImpl implements NotificationService {
 
         Post post = postRepository.findById(postId).orElse(null);
 
-        // Lưu vào DB
+        // Save to DB
         Notification notification = Notification.builder()
                 .actor(actor)
                 .recipient(recipient)
@@ -63,7 +63,7 @@ public class NotificationServiceImpl implements NotificationService {
                 .build();
         notification = notificationRepository.save(notification);
 
-        // Push realtime qua WebSocket
+        // Push realtime over WebSocket
         NotificationResponse response = mapToResponse(notification);
         sendToUser(recipientUsername, response);
 
@@ -84,7 +84,7 @@ public class NotificationServiceImpl implements NotificationService {
             try {
                 createAndSend(authorUsername, followerUsername, NotificationType.NEW_POST, postId);
             } catch (Exception e) {
-                // Không để lỗi một follower ảnh hưởng đến các follower khác
+                // Do not let one follower failure affect others
                 log.warn("Failed to notify follower {}: {}", followerUsername, e.getMessage());
             }
         }
@@ -114,7 +114,7 @@ public class NotificationServiceImpl implements NotificationService {
     // ------------------------------------------------------------------
 
     /**
-     * Push message qua WebSocket tới một user cụ thể.
+     * Push message over WebSocket to a specific user.
      * Destination: /user/{username}/topic/notifications
      */
     private void sendToUser(String username, NotificationResponse payload) {
@@ -125,7 +125,7 @@ public class NotificationServiceImpl implements NotificationService {
                     payload
             );
         } catch (Exception e) {
-            // User không online — không sao, DB đã lưu, họ sẽ thấy khi login lại
+            // User is offline - it's okay, DB saved it and they will see it when logging in again
             log.debug("Could not push WS notification to {} (likely offline): {}", username, e.getMessage());
         }
     }

@@ -60,7 +60,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/users/register", "/api/users/login").permitAll()
                         .requestMatchers("/error").permitAll()
-                        // WebSocket handshake — JWT auth xảy ra trong STOMP CONNECT frame
+                        // WebSocket handshake - JWT auth happens in STOMP CONNECT frame
                         .requestMatchers("/ws/**").permitAll()
                         .anyRequest().authenticated()
                 );

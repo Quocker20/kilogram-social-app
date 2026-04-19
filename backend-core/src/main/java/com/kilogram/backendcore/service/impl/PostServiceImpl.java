@@ -76,7 +76,7 @@ public class PostServiceImpl implements PostService {
 
         Post savedPost = postRepository.save(post);
 
-        // Async fan-out: thông báo tới tất cả follower
+        // Async fan-out: notify all followers
         notificationService.notifyFollowers(currentUsername, savedPost.getId());
 
         return mapToPostResponse(savedPost);

@@ -1,25 +1,30 @@
 import { useState, useEffect, useRef } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import Sidebar from '../components/layout/Sidebar';
 import RightPanel from '../components/layout/RightPanel';
 import CreatePostModal from '../features/post/components/PostModal';
 import NotificationToast from '../components/common/NotificationToast';
 import { useNotifications } from '../hooks/useNotifications';
+import { useChatStomp } from '../hooks/useChatStomp';
 import { useNotificationStore } from '../store/notificationStore';
 import type { NotificationItem } from '../types';
 
 /**
- * Layout chính — mount WebSocket notifications một lần cho toàn bộ app.
- * Toast hiện khi nhận thông báo realtime mới.
+ * Main Layout - mounts WebSocket notifications once for the entire app.
+ * A toast is shown when a new real-time notification is received.
  */
 export default function MainLayout() {
   const [toastNotif, setToastNotif] = useState<NotificationItem | null>(null);
   const prevCountRef = useRef(0);
+  const location = useLocation();
+  const isMessagesPage = location.pathname.startsWith('/messages');
 
-  // Kết nối WebSocket + subscribe notifications, fetch initial unread count
+  // Connect WebSocket + subscribe to notifications, fetch initial unread count
   useNotifications();
+  // Connect WebSocket for real-time chat messages
+  useChatStomp();
 
-  // Khi có notification mới được thêm vào store → hiện toast
+  // Show toast when a new notification is added to the store
   const notifications = useNotificationStore((state) => state.notifications);
   useEffect(() => {
     if (notifications.length > prevCountRef.current) {
@@ -32,18 +37,18 @@ export default function MainLayout() {
     <div className="flex min-h-screen bg-white">
       <Sidebar />
 
-      <main className="ml-20 flex flex-1 justify-center xl:ml-64">
-        <div className="flex w-full max-w-5xl px-4 py-8 lg:px-8">
-          <div className="flex-1">
+      <main className="ml-20 flex flex-1 justify-center xl:ml-64 overflow-hidden h-screen">
+        <div className={`flex w-full px-4 lg:px-8 ${isMessagesPage ? 'max-w-6xl py-4 h-full' : 'max-w-5xl py-8 overflow-y-auto'}`}>
+          <div className="flex-1 flex flex-col h-full min-w-0">
             <Outlet />
           </div>
-          <RightPanel />
+          {!isMessagesPage && <RightPanel />}
         </div>
       </main>
 
       <CreatePostModal />
 
-      {/* Push notification toast — tự ẩn sau 4 giây, không cần tương tác */}
+      {/* Push notification toast - automatically hides after 4 seconds, no interaction needed */}
       <NotificationToast
         notification={toastNotif}
         onDismiss={() => setToastNotif(null)}

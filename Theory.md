@@ -280,7 +280,49 @@ client.heartbeatOutgoing = 4000;
 
 ---
 
-## 10. Tại sao @Async cho notifyFollowers?
+## 10. Kịch bản Data Flow: Direct Message (Real-time Chat)
+
+Giao tiếp Web-socket 2 chiều cho phép Client vừa có thể nhận push Real-time tự động, vừa có thể gửi tin qua một kênh chung. Ở Kilogram, kịch bản Chat kết hợp giữa HTTP REST (cho hành động gửi) và STOMP (cho hành động nhận) nhằm đảm bảo lưu lượng tin nhắn chuẩn xác và dễ bắt lỗi HTTP.
+
+### Luồng tin nhắn 1-1 (User A gửi tin cho User B)
+
+```
+1. [FE - User A] Gõ tin nhắn vào `ChatInput.tsx` và bấm gửi.
+       ↓
+2. [FE - User A] Gọi API `POST /api/chat/send` (HTTP) kèm theo `receiverId` và `content`.
+       ↓
+3. [BE] `ChatController.sendMessage()` tiếp nhận request.
+       ↓
+4. [BE] `ChatServiceImpl.sendMessage()`:
+        - Validate Sender & Receiver.
+        - Lấy ra Conversation (hộp thoại) hiện tại, hoặc tự động tạo nếu chưa chat với nhau bao giờ.
+        - Persistent: Lưu Message vào DB thông qua `MessageRepository.save()`.
+        - Update: Cập nhật lại `lastMessage` và `lastMessageAt` cho Conversation.
+       ↓
+5. [BE - Push STOMP] Sử dụng `SimpMessagingTemplate` để bắn message vừa lưu qua Broker:
+        - `messagingTemplate.convertAndSendToUser(receiver.getUsername(), "/topic/messages", messageDto)`
+        - `messagingTemplate.convertAndSendToUser(sender.getUsername(), "/topic/messages", messageDto)`
+       ↓
+6. [In-Memory Broker] Route payload message tới 2 destination độc lập:
+        - `/user/userA/topic/messages`
+        - `/user/userB/topic/messages`
+       ↓
+7. [WebSocket] Đẩy package thông qua kết nối TCP đang giữ sẵn của cả A và B.
+       ↓
+8. [FE - User A & B] Custom hook `useChatStomp.ts` đang lắng nghe channel này nhận được MESSAGE.
+       ↓
+9. [FE] Parse payload JSON và đẩy vào `chatStore` (Zustand):
+        - `addMessage(message)`: List message UI lập tức phình ra 1 dòng với hiệu ứng sroll.
+        - `updateConversationListWithMessage(...)`: Thanh Sidebar tự động cập nhật text preview mới nhất lên đầu danh sách (Sort by Date).
+```
+
+**Tại sao GỬI qua REST, còn NHẬN qua STOMP?**
+- Gửi qua REST cho phép có status code rành mạch (200 OK, 400 Bad Request, 403 / 404). Nếu Web-socket disconnect lỡ chừng, bạn sẽ lập trường handle error rõ ràng hơn là bắn thẳng `STOMP SEND`.
+- Nhận qua STOMP (Push-based) bảo đảm độ trễ cực thấp cho realtime. Thậm chí chính người gửi (Sender) cũng nhận lại payload qua STOMP để tự động append vào UI thay vì phải xử lý logic tĩnh nội bộ ở máy, giúp đồng bộ hóa dữ liệu tuyệt đối (Single source of truth).
+
+---
+
+## 11. Tại sao @Async cho notifyFollowers?
 
 ```
 Không @Async:
@@ -296,15 +338,18 @@ POST /api/posts → save post → response 200 ngay lập tức
 
 ---
 
-## 11. Tóm tắt các component WebSocket trong Kilogram
+## 12. Tóm tắt các component WebSocket trong Kilogram
 
 | Component | Vai trò |
 |---|---|
 | `WebSocketConfig` | Cấu hình broker, endpoints, prefixes |
 | `WebSocketAuthInterceptor` | Validate JWT trong STOMP CONNECT |
 | `AsyncConfig` | Thread pool cho fan-out notifications |
-| `NotificationServiceImpl` | Business logic: tạo notification + push |
-| `SimpMessagingTemplate` | Spring bean để push message từ server |
-| `useStompClient.ts` | FE: quản lý kết nối STOMP, tái dụng cho chat |
-| `useNotifications.ts` | FE: subscribe topic notifications cụ thể |
-| `notificationStore.ts` | FE: Zustand state cho notifications |
+| `NotificationServiceImpl`| Logic: tạo list notification + push follower |
+| `ChatServiceImpl` | Logic: chat 1-1, persist message + multi-push 2 users |
+| `SimpMessagingTemplate` | Spring bean để push message từ server qua channel |
+| `useStompClient.ts` | FE: Core quản lý kết nối STOMP / SockJS, tái sử dụng |
+| `useNotifications.ts` | FE: hook subscribe topic notifications |
+| `useChatStomp.ts` | FE: hook subscribe topic message chat |
+| `notificationStore.ts` | FE: Zustand state global quản lý badge list |
+| `chatStore.ts` | FE: Zustand state quản lý history và Active chat view |
