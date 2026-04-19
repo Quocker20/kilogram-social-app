@@ -12,7 +12,11 @@ target/
 *.iml
 *.iws
 
-# Environment files (contains real secrets -- never commit)
+# Python (AI Microservice)
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
 .env
 .env.*
 

@@ -21,9 +21,17 @@ public interface FollowRepository extends JpaRepository<Follow, Follow.FollowId>
 
     boolean existsByFollowerAndFollowing(User follower, User following);
 
-    @Query("SELECT f.follower FROM Follow f WHERE f.following.username = :username AND f.follower.isActive = true ORDER BY f.createdAt DESC")
+    @Query("SELECT f.follower.username FROM Follow f WHERE f.following.username = :username AND f.follower.isActive = true ORDER BY f.createdAt DESC")
     Slice<User> findFollowersByFollowingUsername(@Param("username") String username, Pageable pageable);
 
     @Query("SELECT f.following FROM Follow f WHERE f.follower.username = :username AND f.following.isActive = true ORDER BY f.createdAt DESC")
     Slice<User> findFollowingByFollowerUsername(@Param("username") String username, Pageable pageable);
+
+    /**
+     * Lấy toàn bộ username của các follower (không phân trang).
+     * Dùng để fan-out thông báo tới tất cả follower khi user đăng bài mới.
+     */
+    @Query("SELECT f.follower.username FROM Follow f " +
+           "WHERE f.following.username = :username AND f.follower.isActive = true")
+    java.util.List<String> findFollowerUsernamesByFollowingUsername(@Param("username") String username);
 }

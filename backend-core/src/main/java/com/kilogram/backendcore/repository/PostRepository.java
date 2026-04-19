@@ -49,4 +49,11 @@ public interface PostRepository extends JpaRepository<Post, String> {
     @Modifying
     @Query("UPDATE Post p SET p.commentCount = p.commentCount - 1 WHERE p.id = :postId AND p.commentCount > 0")
     void decrementCommentCount(@Param("postId") String postId);
+
+    /**
+     * Lấy username của owner bài viết — dùng để gửi thông báo khi có like/comment.
+     * Chỉ lấy đúng một field, không cần load toàn bộ Post entity.
+     */
+    @Query("SELECT p.user.username FROM Post p WHERE p.id = :postId")
+    java.util.Optional<String> findOwnerUsernameById(@Param("postId") String postId);
 }

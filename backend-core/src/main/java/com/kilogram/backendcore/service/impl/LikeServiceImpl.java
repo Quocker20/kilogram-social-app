@@ -2,6 +2,7 @@ package com.kilogram.backendcore.service.impl;
 
 import com.kilogram.backendcore.dto.response.UserResponse;
 import com.kilogram.backendcore.entity.Like;
+import com.kilogram.backendcore.entity.Notification.NotificationType;
 import com.kilogram.backendcore.entity.Post;
 import com.kilogram.backendcore.entity.User;
 import com.kilogram.backendcore.entity.UserInteraction;
@@ -10,6 +11,7 @@ import com.kilogram.backendcore.repository.PostRepository;
 import com.kilogram.backendcore.repository.UserInteractionRepository;
 import com.kilogram.backendcore.repository.UserRepository;
 import com.kilogram.backendcore.service.LikeService;
+import com.kilogram.backendcore.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -26,6 +28,7 @@ public class LikeServiceImpl implements LikeService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final UserInteractionRepository userInteractionRepository;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
@@ -43,6 +46,10 @@ public class LikeServiceImpl implements LikeService {
         likeRepository.save(like);
 
         postRepository.incrementLikeCount(postId);
+
+        // Thông báo tới chủ bài viết
+        postRepository.findOwnerUsernameById(postId).ifPresent(ownerUsername ->
+                notificationService.createAndSend(currentUsername, ownerUsername, NotificationType.LIKE, postId));
 
         logInteraction(user, postProxy, UserInteraction.InteractionType.LIKE);
         log.info("User {} liked post {}", currentUsername, postId);

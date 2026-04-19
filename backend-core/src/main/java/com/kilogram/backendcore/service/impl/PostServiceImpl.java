@@ -10,6 +10,7 @@ import com.kilogram.backendcore.repository.LikeRepository;
 import com.kilogram.backendcore.repository.PostRepository;
 import com.kilogram.backendcore.repository.UserRepository;
 import com.kilogram.backendcore.service.ImageService;
+import com.kilogram.backendcore.service.NotificationService;
 import com.kilogram.backendcore.service.PostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +37,7 @@ public class PostServiceImpl implements PostService {
     private final UserRepository userRepository;
     private final LikeRepository likeRepository;
     private final ImageService imageService;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
@@ -73,6 +75,10 @@ public class PostServiceImpl implements PostService {
         }
 
         Post savedPost = postRepository.save(post);
+
+        // Async fan-out: thông báo tới tất cả follower
+        notificationService.notifyFollowers(currentUsername, savedPost.getId());
+
         return mapToPostResponse(savedPost);
     }
 

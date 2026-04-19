@@ -5,6 +5,7 @@ import com.kilogram.backendcore.dto.request.CommentUpdateRequest;
 import com.kilogram.backendcore.dto.response.CommentResponse;
 import com.kilogram.backendcore.dto.response.UserResponse;
 import com.kilogram.backendcore.entity.Comment;
+import com.kilogram.backendcore.entity.Notification.NotificationType;
 import com.kilogram.backendcore.entity.Post;
 import com.kilogram.backendcore.entity.User;
 import com.kilogram.backendcore.entity.UserInteraction;
@@ -13,6 +14,7 @@ import com.kilogram.backendcore.repository.PostRepository;
 import com.kilogram.backendcore.repository.UserInteractionRepository;
 import com.kilogram.backendcore.repository.UserRepository;
 import com.kilogram.backendcore.service.CommentService;
+import com.kilogram.backendcore.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -29,6 +31,7 @@ public class CommentServiceImpl implements CommentService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final UserInteractionRepository userInteractionRepository;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
@@ -47,6 +50,10 @@ public class CommentServiceImpl implements CommentService {
 
         Comment savedComment = commentRepository.save(comment);
         postRepository.incrementCommentCount(postId);
+
+        // Thông báo tới chủ bài viết
+        postRepository.findOwnerUsernameById(postId).ifPresent(ownerUsername ->
+                notificationService.createAndSend(currentUsername, ownerUsername, NotificationType.COMMENT, postId));
 
         logInteraction(user, postProxy, UserInteraction.InteractionType.COMMENT);
 

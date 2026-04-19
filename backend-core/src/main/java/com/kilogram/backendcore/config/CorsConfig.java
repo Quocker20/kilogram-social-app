@@ -22,8 +22,9 @@ public class CorsConfig {
         config.addAllowedHeader("*");
         config.addAllowedMethod("*");
         
-        // Apply this configuration to all API endpoints
+        // Apply this configuration to all API endpoints and WebSocket endpoint
         source.registerCorsConfiguration("/**", config);
+        source.registerCorsConfiguration("/ws/**", config);
         return new CorsFilter(source);
     }
 }
