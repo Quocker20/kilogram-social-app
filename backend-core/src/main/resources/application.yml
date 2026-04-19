@@ -11,8 +11,8 @@ spring:
 
   datasource:
     url: jdbc:mysql://localhost:3306/kilogram_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8
-    username: root
-    password: admin
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:admin}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -32,16 +32,15 @@ spring:
 
 app:
   jwt:
-    secret: KilogramSuperSecretKeyForJwtGenerationDoNotShare2026!@#
+    secret: ${JWT_SECRET}
     expiration-milliseconds: 86400000
 
 cloudinary:
-  cloud-name: dah2e3q3f
-  api-key: 523155919872356
-  api-secret: dvpOwhfDOEfPZllNMDuJ83gf084
+  cloud-name: ${CLOUDINARY_CLOUD_NAME}
+  api-key: ${CLOUDINARY_API_KEY}
+  api-secret: ${CLOUDINARY_API_SECRET}
 
 logging:
   level:
-    # Suppress benign Spring Security warning that fires when a custom AuthenticationProvider
-    # bean is present (intentional — we use ReactivatingAuthenticationProvider).
-    org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer: ERROR
+    org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer: ERROR
+

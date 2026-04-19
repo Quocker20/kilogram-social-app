@@ -191,7 +191,9 @@ public class PostServiceImpl implements PostService {
         Set<String> likedPostIdsSet = new HashSet<>();
 
         if (currentUser != null) {
-            List<String> postIds = postsSlice.getContent().stream().map(Post::getId).collect(Collectors.toList());
+            List<String> postIds = postsSlice.getContent().stream()
+                    .map(Post::getId)
+                    .collect(Collectors.toList());
             List<String> likedPostIdsList = likeRepository.findLikedPostIdsByUserAndPosts(currentUser.getId(), postIds);
             likedPostIdsSet.addAll(likedPostIdsList);
         }

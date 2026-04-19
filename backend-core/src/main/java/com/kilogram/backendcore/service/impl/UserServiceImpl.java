@@ -244,7 +244,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional(readOnly = true)
-    public java.util.List<UserResponse> searchUsers(String keyword) {
+    public List<UserResponse> searchUsers(String keyword) {
         log.info("Processing user search with keyword: {}", keyword);
 
         if (keyword == null || keyword.trim().isEmpty()) {
@@ -252,12 +252,12 @@ public class UserServiceImpl implements UserService {
             return java.util.Collections.emptyList();
         }
 
-        java.util.List<User> users = userRepository.searchActiveUsersByKeyword(keyword.trim());
+        List<User> users = userRepository.searchActiveUsersByKeyword(keyword.trim());
         log.info("Found {} active users matching the keyword", users.size());
 
         return users.stream()
                 .map(this::mapToUserResponse)
-                .collect(java.util.stream.Collectors.toList());
+                .collect(Collectors.toList());
     }
 
     @Override
