@@ -12,18 +12,9 @@ target/
 *.iml
 *.iws
 
-# Python (AI Microservice)
-__pycache__/
-*.py[cod]
-*$py.class
-venv/
+# Environment files (contains real secrets -- never commit)
 .env
 .env.*
-!.env.example
-
-# Spring Boot local config overrides (should never be committed)
-application-local.yml
-application-local.yaml
 
 # Node.js (Frontend)
 node_modules/
@@ -33,4 +24,4 @@ build/
 # Docker
 .docker/
 
-kilogram.env
+kilogram.env
