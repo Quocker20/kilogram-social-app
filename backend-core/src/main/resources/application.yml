@@ -16,13 +16,13 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: none
     show-sql: true
     properties:
       hibernate:
         format_sql: true
-        dialect: org.hibernate.dialect.MySQLDialect
         default_batch_fetch_size: 100
 
   data:
@@ -39,3 +39,9 @@ cloudinary:
   cloud-name: dah2e3q3f
   api-key: 523155919872356
   api-secret: dvpOwhfDOEfPZllNMDuJ83gf084
+
+logging:
+  level:
+    # Suppress benign Spring Security warning that fires when a custom AuthenticationProvider
+    # bean is present (intentional — we use ReactivatingAuthenticationProvider).
+    org.springframework.security.config.annotation.authentication.configuration.InitializeUserDetailsBeanManagerConfigurer: ERROR

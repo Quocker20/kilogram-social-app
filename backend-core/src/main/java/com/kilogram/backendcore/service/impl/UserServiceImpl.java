@@ -15,6 +15,9 @@ import com.kilogram.backendcore.service.ImageService;
 import com.kilogram.backendcore.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +47,7 @@ public class UserServiceImpl implements UserService {
     private final FollowRepository followRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtTokenProvider jwtTokenProvider;
+    private final AuthenticationManager authenticationManager;
     private final ImageService imageService;
     private final RedisTemplate<String, Object> redisTemplate;
     private final ObjectMapper objectMapper;
@@ -119,22 +123,14 @@ public class UserServiceImpl implements UserService {
     public AuthResponse loginUser(LoginRequest request) {
         log.info("Processing login request for user: {}", request.getUsername());
 
-        User user = userRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> {
-                    log.error("Login failed: User '{}' not found", request.getUsername());
-                    return new IllegalArgumentException("Invalid username or password");
-                });
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getUsername(),
+                        request.getPassword()
+                )
+        );
 
-        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            log.warn("Login failed: Incorrect password for user '{}'", request.getUsername());
-            throw new IllegalArgumentException("Invalid username or password");
-        }
-
-        if (!user.isActive()) {
-            log.info("Auto-reactivating account for user: {}", user.getUsername());
-            user.setActive(true);
-            userRepository.save(user);
-        }
+        User user = (User) authentication.getPrincipal();
 
         String accessToken = jwtTokenProvider.generateToken(user.getUsername());
 
