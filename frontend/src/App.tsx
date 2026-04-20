@@ -13,6 +13,7 @@ import Register from './pages/Register';
 import Notifications from './pages/Notifications';
 import DirectMessages from './pages/DirectMessages';
 import PostDetailModal from './components/post/PostDetailModal';
+import Explore from './pages/Explore';
 
 const PlaceholderPage = ({ title }: { title: string }) => (
   <div className="py-20 text-center font-bold text-gray-400">
@@ -35,7 +36,7 @@ export default function App() {
           <Route element={<ProtectedRoute />}>
             <Route element={<MainLayout />}>
               <Route path="/" element={<Feed />} />
-              <Route path="/explore" element={<PlaceholderPage title="Explore" />} />
+              <Route path="/explore" element={<Explore />} />
               <Route path="/messages" element={<DirectMessages />} />
               <Route path="/search" element={<Search />} />
               <Route path="/accounts/edit" element={<EditProfile />} />
