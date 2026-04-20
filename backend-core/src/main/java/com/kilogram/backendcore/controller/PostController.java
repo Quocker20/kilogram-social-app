@@ -80,6 +80,14 @@ public class PostController {
         return ResponseEntity.ok(postService.getNewsFeed(principal.getName(), page, size));
     }
 
+    @GetMapping("/explore")
+    public ResponseEntity<List<PostResponse>> getExploreFeed(
+            Principal principal,
+            @RequestParam(defaultValue = "20") int limit) {
+        log.info("REST request to get explore feed for user: {}, limit: {}", principal.getName(), limit);
+        return ResponseEntity.ok(postService.getExploreFeed(principal.getName(), limit));
+    }
+
     @PostMapping("/explore/recommended")
     public ResponseEntity<List<PostResponse>> getRecommendedPosts(
             @RequestBody List<String> recommendedPostIds) {

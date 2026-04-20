@@ -22,4 +22,6 @@ public interface PostService {
     Slice<PostResponse> getNewsFeed(String currentUsername, int page, int size);
 
     List<PostResponse> getRecommendedPosts(List<String> recommendedPostIds);
+
+    List<PostResponse> getExploreFeed(String currentUsername, int limit);
 }

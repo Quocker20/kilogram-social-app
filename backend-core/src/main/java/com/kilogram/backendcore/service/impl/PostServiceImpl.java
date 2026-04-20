@@ -27,6 +27,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.web.client.RestTemplate;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+
 
 @Service
 @RequiredArgsConstructor
@@ -38,6 +43,7 @@ public class PostServiceImpl implements PostService {
     private final LikeRepository likeRepository;
     private final ImageService imageService;
     private final NotificationService notificationService;
+    private final RestTemplate restTemplate;
 
     @Override
     @Transactional
@@ -238,6 +244,31 @@ public class PostServiceImpl implements PostService {
         List<Post> unorderedPosts = postRepository.findActiveByIdIn(recommendedPostIds);
         Map<String, Post> postMap = unorderedPosts.stream().collect(Collectors.toMap(Post::getId, p -> p));
         return recommendedPostIds.stream().filter(postMap::containsKey).map(postMap::get).map(this::mapToPostResponse).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PostResponse> getExploreFeed(String currentUsername, int limit) {
+        User currentUser = userRepository.findByUsername(currentUsername)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        String aiServiceUrl = "http://localhost:8001/api/v1/recommend/explore?user_id=" + currentUser.getId() + "&limit=" + limit;
+        try {
+            ResponseEntity<Map<String, List<String>>> response = restTemplate.exchange(
+                    aiServiceUrl,
+                    HttpMethod.GET,
+                    null,
+                    new ParameterizedTypeReference<Map<String, List<String>>>() {}
+            );
+            
+            if (response.getBody() != null && response.getBody().containsKey("postIds")) {
+                List<String> postIds = response.getBody().get("postIds");
+                return getRecommendedPosts(postIds);
+            }
+        } catch (Exception e) {
+            log.error("Failed to fetch explore feed from AI service for user: " + currentUsername, e);
+        }
+        return List.of();
     }
 
     private PostResponse mapToPostResponse(Post post) {
