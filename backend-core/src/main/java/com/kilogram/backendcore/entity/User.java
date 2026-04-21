@@ -42,6 +42,7 @@ public class User implements UserDetails {
     @Column(name = "avatar_url")
     private String avatarUrl;
 
+    //To work with Cloudinary
     @Column(name = "avatar_public_id")
     private String avatarPublicId;
 
@@ -89,4 +90,4 @@ public class User implements UserDetails {
 
     @Override
     public boolean isCredentialsNonExpired() { return true; }
-}
+}
