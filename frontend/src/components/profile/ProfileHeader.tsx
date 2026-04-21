@@ -86,7 +86,6 @@ export default function ProfileHeader({ profile }: ProfileHeaderProps) {
           </div>
 
           <div className="flex space-x-8 text-sm md:text-base">
-            <span><span className="font-semibold">{profile.postCount || 0}</span> posts</span>
             <button onClick={() => setIsFollowersModalOpen(true)} className="hover:opacity-70 focus:outline-none"><span className="font-semibold">{profile.numOfFollowers || 0}</span> followers</button>
             <button onClick={() => setIsFollowingModalOpen(true)} className="hover:opacity-70 focus:outline-none"><span className="font-semibold">{profile.numOfFollowing || 0}</span> following</button>
           </div>
