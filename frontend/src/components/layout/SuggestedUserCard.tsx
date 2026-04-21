@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import type { User } from '../../types';
 import { users } from '../../features/user/api/users';
 import { UserCircle } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface SuggestedUserCardProps {
   user: User;
@@ -12,11 +13,16 @@ export default function SuggestedUserCard({ user }: SuggestedUserCardProps) {
   const [isFollowing, setIsFollowing] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const queryClient = useQueryClient();
+
   const handleFollow = async () => {
     try {
       setIsLoading(true);
       const res = await users.toggleFollow(user.username);
       setIsFollowing(res.isFollowing);
+      
+      // Notify parent/query client to refetch suggestions so the user is removed from suggestions
+      queryClient.invalidateQueries({ queryKey: ['suggestions'] });
     } catch (error) {
       console.error('Failed to toggle follow', error);
     } finally {

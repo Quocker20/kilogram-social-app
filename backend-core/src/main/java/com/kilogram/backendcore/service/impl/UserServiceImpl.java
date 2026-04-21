@@ -281,6 +281,13 @@ public class UserServiceImpl implements UserService {
             followRepository.delete(existingFollow.get());
             userRepository.decrementFollowingCount(currentUser.getId());
             userRepository.decrementFollowerCount(targetUser.getId());
+            
+            try {
+                redisTemplate.delete(SUGGESTION_CACHE_PREFIX + currentUsername);
+            } catch (Exception e) {
+                log.warn("Failed to delete suggestions cache for {}", currentUsername, e);
+            }
+            
             return false;
         } else {
             log.info("User {} is following {}", currentUsername, targetUsername);
@@ -291,6 +298,13 @@ public class UserServiceImpl implements UserService {
             followRepository.save(newFollow);
             userRepository.incrementFollowingCount(currentUser.getId());
             userRepository.incrementFollowerCount(targetUser.getId());
+            
+            try {
+                redisTemplate.delete(SUGGESTION_CACHE_PREFIX + currentUsername);
+            } catch (Exception e) {
+                log.warn("Failed to delete suggestions cache for {}", currentUsername, e);
+            }
+            
             return true;
         }
     }
