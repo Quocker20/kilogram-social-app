@@ -1,18 +1,35 @@
-import { useState, useEffect } from 'react';
-import { X, Heart, MessageCircle, Bookmark, ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { X, Heart, MessageCircle, Bookmark, ChevronLeft, ChevronRight, MoreHorizontal, Edit2, Trash2 } from 'lucide-react';
 import { useModalStore } from '../../store/modalStore';
 import { likePostApi, unlikePostApi, getPostLikersApi } from '../../features/post/api/interactions';
 import CommentSection from '../feed/CommentSection';
 import UserListModal from '../common/UserListModal';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAuthStore } from '../../store/authStore';
+import { posts } from '../../features/post/api/posts';
 
 export default function PostDetailModal() {
-  const { isPostDetailOpen, selectedPost: post, closePostDetail } = useModalStore();
+  const { isPostDetailOpen, selectedPost: post, closePostDetail, openPostModal } = useModalStore();
+  const queryClient = useQueryClient();
+  const currentUser = useAuthStore((state) => state.user);
 
   const [isLiked, setIsLiked] = useState(false);
   const [likeCount, setLikeCount] = useState(0);
   const [isLiking, setIsLiking] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLikersModalOpen, setIsLikersModalOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     if (post) {
@@ -46,7 +63,38 @@ export default function PostDetailModal() {
     }
   };
 
+  const deleteMutation = useMutation({
+    mutationFn: () => {
+      if (!post) throw new Error("No post selected");
+      return posts.deletePost(post.id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['feed'] });
+      queryClient.invalidateQueries({ queryKey: ['user-posts'] });
+      closePostDetail();
+    },
+    onError: (error) => {
+      console.error('Failed to delete post:', error);
+      alert('Could not delete post. Please try again.');
+    }
+  });
+
   if (!isPostDetailOpen || !post) return null;
+
+  const isOwner = currentUser?.username === post.author.username;
+
+  const handleEdit = () => {
+    setIsMenuOpen(false);
+    closePostDetail();
+    openPostModal(post);
+  };
+
+  const handleDelete = () => {
+    setIsMenuOpen(false);
+    if (window.confirm('Are you sure you want to delete this post?')) {
+      deleteMutation.mutate();
+    }
+  };
 
   const hasMultipleImages = post.images && post.images.length > 1;
 
@@ -97,7 +145,31 @@ export default function PostDetailModal() {
               />
               <span className="text-sm font-semibold">{post.author.username}</span>
             </div>
-            <MoreHorizontal size={20} className="text-gray-600 cursor-pointer" />
+            <div className="relative" ref={menuRef}>
+              <button
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                className="text-gray-500 hover:text-gray-700 p-1"
+              >
+                <MoreHorizontal size={20} />
+              </button>
+
+              {isMenuOpen && isOwner && (
+                <div className="absolute right-0 top-full mt-1 w-32 rounded-md border border-gray-100 bg-white shadow-lg z-10">
+                  <button
+                    onClick={handleEdit}
+                    className="flex w-full items-center gap-2 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                  >
+                    <Edit2 size={16} /> Edit
+                  </button>
+                  <button
+                    onClick={handleDelete}
+                    className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                  >
+                    <Trash2 size={16} /> Delete
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 scrollbar-hide">
