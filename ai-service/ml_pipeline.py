@@ -19,7 +19,6 @@ def load_data(db_engine):
     query_interactions = """
     SELECT user_id, post_id, interaction_type 
     FROM user_interactions 
-    WHERE interaction_type IN ('LIKE', 'COMMENT')
     """
     df_interactions = pd.read_sql(query_interactions, db_engine)
     
@@ -27,14 +26,20 @@ def load_data(db_engine):
     def get_score(row):
         if row['interaction_type'] == 'COMMENT':
             return 5
+        elif row['interaction_type'] == 'DELETE_COMMENT':
+            return -5
         elif row['interaction_type'] == 'LIKE':
             return 3
+        elif row['interaction_type'] == 'UNLIKE':
+            return -3
         return 0
     
     if not df_interactions.empty:
         df_interactions['score'] = df_interactions.apply(get_score, axis=1)
-        # Sum scores if a user liked and commented on the same post
+        # Sum scores to handle multiple interactions (e.g., LIKE then UNLIKE)
         df_grouped = df_interactions.groupby(['user_id', 'post_id'])['score'].sum().reset_index()
+        # Filter out posts with net score <= 0 (meaning interaction was reverted)
+        df_grouped = df_grouped[df_grouped['score'] > 0]
     else:
         df_grouped = pd.DataFrame(columns=['user_id', 'post_id', 'score'])
         

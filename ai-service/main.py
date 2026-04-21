@@ -60,7 +60,14 @@ def recommend_explore(user_id: str, limit: int = Query(20, le=100), db: Session 
           )
           AND p.id NOT IN (
               SELECT post_id FROM user_interactions 
-              WHERE user_id = :user_id AND interaction_type IN ('LIKE', 'COMMENT')
+              WHERE user_id = :user_id 
+              GROUP BY post_id
+              HAVING SUM(CASE 
+                  WHEN interaction_type = 'COMMENT' THEN 5 
+                  WHEN interaction_type = 'DELETE_COMMENT' THEN -5 
+                  WHEN interaction_type = 'LIKE' THEN 3 
+                  WHEN interaction_type = 'UNLIKE' THEN -3 
+                  ELSE 0 END) > 0
           )
         ORDER BY p.created_at DESC
         LIMIT 1000
