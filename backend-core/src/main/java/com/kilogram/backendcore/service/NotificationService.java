@@ -7,38 +7,38 @@ import org.springframework.data.domain.Slice;
 public interface NotificationService {
 
     /**
-     * Tạo, lưu DB, và push realtime thông báo tới MỘT recipient.
-     * Dùng cho LIKE và COMMENT.
+     * Creates, saves to DB, and pushes a real-time notification to ONE recipient.
+     * Used for LIKE and COMMENT.
      *
-     * @param actorUsername    username người thực hiện hành động
-     * @param recipientUsername username người nhận thông báo
-     * @param type             loại thông báo (LIKE, COMMENT)
-     * @param postId           ID bài viết liên quan
+     * @param actorUsername    username of the actor
+     * @param recipientUsername username of the recipient
+     * @param type             notification type (LIKE, COMMENT)
+     * @param postId           related post ID
      */
     void createAndSend(String actorUsername, String recipientUsername,
                        NotificationType type, String postId);
 
     /**
-     * Fan-out thông báo NEW_POST tới TẤT CẢ follower của author.
-     * Được gọi async (@Async) từ PostServiceImpl sau khi đăng bài.
+     * Fan-out NEW_POST notifications to ALL followers of the author.
+     * Called asynchronously (@Async) from PostServiceImpl after posting.
      *
-     * @param authorUsername username người đăng bài
-     * @param postId         ID bài viết vừa tạo
+     * @param authorUsername username of the author
+     * @param postId         ID of the newly created post
      */
     void notifyFollowers(String authorUsername, String postId);
 
     /**
-     * Lấy tất cả thông báo của user, mới nhất trước, phân trang.
+     * Retrieves all notifications for a user, sorted by newest first, with pagination.
      */
     Slice<NotificationResponse> getNotifications(String username, int page, int size);
 
     /**
-     * Đếm thông báo chưa đọc — dùng cho sidebar badge.
+     * Counts unread notifications - used for the sidebar badge.
      */
     long getUnreadCount(String username);
 
     /**
-     * Đánh dấu tất cả thông báo chưa đọc của user là đã đọc.
+     * Marks all unread notifications of a user as read.
      */
     void markAllRead(String username);
 }

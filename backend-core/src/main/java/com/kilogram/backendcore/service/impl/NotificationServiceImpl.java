@@ -37,9 +37,6 @@ public class NotificationServiceImpl implements NotificationService {
      */
     private final SimpMessagingTemplate messagingTemplate;
 
-    // ------------------------------------------------------------------
-    // Public API
-    // ------------------------------------------------------------------
 
     @Override
     @Transactional
@@ -54,7 +51,6 @@ public class NotificationServiceImpl implements NotificationService {
 
         Post post = postRepository.findById(postId).orElse(null);
 
-        // Save to DB
         Notification notification = Notification.builder()
                 .actor(actor)
                 .recipient(recipient)
@@ -63,11 +59,10 @@ public class NotificationServiceImpl implements NotificationService {
                 .build();
         notification = notificationRepository.save(notification);
 
-        // Push realtime over WebSocket
         NotificationResponse response = mapToResponse(notification);
         sendToUser(recipientUsername, response);
 
-        log.debug("Notification [{}] sent: {} → {}", type, actorUsername, recipientUsername);
+        log.debug("Notification [{}] sent: {} -> {}", type, actorUsername, recipientUsername);
     }
 
     @Override
@@ -108,10 +103,6 @@ public class NotificationServiceImpl implements NotificationService {
     public void markAllRead(String username) {
         notificationRepository.markAllReadByRecipientUsername(username);
     }
-
-    // ------------------------------------------------------------------
-    // Private helpers
-    // ------------------------------------------------------------------
 
     /**
      * Push message over WebSocket to a specific user.
@@ -157,9 +148,9 @@ public class NotificationServiceImpl implements NotificationService {
     private String buildMessage(Notification n) {
         String actor = n.getActor().getDisplayName();
         return switch (n.getType()) {
-            case NEW_POST -> actor + " vừa đăng một bài viết mới";
-            case LIKE     -> actor + " đã thích bài viết của bạn";
-            case COMMENT  -> actor + " đã bình luận về bài viết của bạn";
+            case NEW_POST -> actor + " posted a new post";
+            case LIKE     -> actor + " liked your post";
+            case COMMENT  -> actor + " commented on your post";
         };
     }
 }
