@@ -38,7 +38,7 @@ export default function MainLayout() {
       <Sidebar />
 
       <main className={`ml-20 flex flex-1 justify-center xl:ml-64 h-screen ${isMessagesPage ? 'overflow-hidden' : 'overflow-y-auto'}`}>
-        <div className={`flex w-full px-4 lg:px-8 ${isMessagesPage ? 'max-w-6xl py-4 h-full overflow-hidden' : 'max-w-5xl py-8'}`}>
+        <div className={`flex w-full ${isMessagesPage ? 'max-w-6xl px-4 lg:px-8 py-4 h-full overflow-hidden' : 'max-w-5xl pr-4 lg:pr-8 py-8'}`}>
           <div className="flex-1 flex flex-col h-full min-w-0">
             <Outlet />
           </div>
