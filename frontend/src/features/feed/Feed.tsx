@@ -49,7 +49,7 @@ export default function Feed() {
   const allPosts = data?.pages.flatMap((page) => page.content) || [];
 
   return (
-    <div className="mx-auto flex w-full max-w-[470px] flex-col items-center pb-20 pt-4">
+    <div className="mx-auto flex w-full max-w-[494px] flex-col items-center pb-20 pt-4">
       {allPosts.length === 0 ? (
         <div className="mt-10 text-center">
           <h2 className="text-xl font-bold text-gray-900">No posts yet</h2>

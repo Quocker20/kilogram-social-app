@@ -24,5 +24,5 @@ class UserInteraction(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(String(36), ForeignKey("users.id"))
     post_id = Column(String(36), ForeignKey("posts.id"))
-    interaction_type = Column(Enum('LIKE', 'UNLIKE', 'COMMENT', 'DELETE_COMMENT', 'VIEW'))
+    interaction_type = Column(Enum('LIKE', 'UNLIKE', 'COMMENT', 'DELETE_COMMENT'))
     created_at = Column(DateTime)

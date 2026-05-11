@@ -10,7 +10,12 @@ import java.time.LocalDateTime;
 @Table(
         name = "conversations",
         uniqueConstraints = {
-                @UniqueConstraint(columnNames = {"user1_id", "user2_id"})
+                @UniqueConstraint(name = "unique_conversation", columnNames = {"user1_id", "user2_id"})
+        },
+        indexes = {
+                @Index(name = "user2_id", columnList = "user2_id"),
+                @Index(name = "idx_user1_last_msg", columnList = "user1_id, last_message_at DESC"),
+                @Index(name = "idx_user2_last_msg", columnList = "user2_id, last_message_at DESC")
         }
 )
 @Getter

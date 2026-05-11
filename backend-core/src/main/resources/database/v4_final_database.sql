@@ -32,6 +32,8 @@ CREATE TABLE `conversations` (
                                  PRIMARY KEY (`id`),
                                  UNIQUE KEY `unique_conversation` (`user1_id`,`user2_id`),
                                  KEY `user2_id` (`user2_id`),
+                                 KEY `idx_user1_last_msg` (`user1_id`,`last_message_at` DESC),
+                                 KEY `idx_user2_last_msg` (`user2_id`,`last_message_at` DESC),
                                  CONSTRAINT `conversations_ibfk_1` FOREIGN KEY (`user1_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
                                  CONSTRAINT `conversations_ibfk_2` FOREIGN KEY (`user2_id`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

@@ -97,7 +97,7 @@ export default function PostCard({ post }: PostCardProps) {
   };
 
   return (
-    <article className="mb-8 w-full rounded-xl border border-gray-200 bg-white sm:max-w-xl relative">
+    <article className="mb-8 w-full rounded-xl bg-white sm:max-w-xl relative">
       <div className="flex items-center justify-between p-3 sm:p-4">
         <Link to={`/${post.author.username}`} className="flex cursor-pointer items-center space-x-3 hover:opacity-80">
           <div className="h-8 w-8 overflow-hidden rounded-full border border-gray-200 bg-gray-100 sm:h-10 sm:w-10">
@@ -137,7 +137,7 @@ export default function PostCard({ post }: PostCardProps) {
         </div>
       </div>
 
-      <div className="relative flex w-full items-center justify-center bg-black">
+      <div className="relative flex w-full items-center justify-center bg-black overflow-hidden rounded-lg">
         {!hasImages ? (
           <img
             src="https://via.placeholder.com/600x600?text=No+Image"
