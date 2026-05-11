@@ -21,7 +21,7 @@ export default function Explore() {
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-[470px] flex-col items-center pb-20 pt-4">
+    <div className="-ml-[200px] mr-auto flex w-full max-w-[517px] flex-col items-center pb-20 pt-4">
       <div className="w-full text-left mb-6">
         <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">Explore</h2>
         <p className="text-sm text-gray-400 font-medium">Trending & Recommendations</p>
