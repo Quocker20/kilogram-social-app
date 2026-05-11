@@ -10,9 +10,9 @@ spring:
       max-request-size: 100MB
 
   datasource:
-    url: jdbc:mysql://localhost:3306/kilogram_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8
-    username: root
-    password: admin
+    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/kilogram_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -27,18 +27,18 @@ spring:
 
   data:
     redis:
-      host: localhost
-      port: 6379
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
 
 app:
   jwt:
-    secret: KilogramSuperSecretKeyForJwtGenerationDoNotShare2026!@#
-    expiration-milliseconds: 86400000
+    secret: ${JWT_SECRET}
+    expiration-milliseconds: ${JWT_EXPIRATION_MS}
 
 cloudinary:
-  cloud-name: dah2e3q3f
-  api-key: 523155919872356
-  api-secret: dvpOwhfDOEfPZllNMDuJ83gf084
+  cloud-name: ${CLOUDINARY_CLOUD_NAME}
+  api-key: ${CLOUDINARY_API_KEY}
+  api-secret: ${CLOUDINARY_API_SECRET}
 
 logging:
   level:
