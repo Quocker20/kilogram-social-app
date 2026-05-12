@@ -6,12 +6,13 @@ import com.kilogram.backendcore.dto.response.UserResponse;
 import com.kilogram.backendcore.entity.Post;
 import com.kilogram.backendcore.entity.PostImage;
 import com.kilogram.backendcore.entity.User;
+import com.kilogram.backendcore.event.PostCreatedEvent;
 import com.kilogram.backendcore.repository.LikeRepository;
 import com.kilogram.backendcore.repository.PostRepository;
 import com.kilogram.backendcore.repository.UserRepository;
 import com.kilogram.backendcore.service.ImageService;
-import com.kilogram.backendcore.service.NotificationService;
 import com.kilogram.backendcore.service.PostService;
+import org.springframework.context.ApplicationEventPublisher;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -42,7 +43,7 @@ public class PostServiceImpl implements PostService {
     private final UserRepository userRepository;
     private final LikeRepository likeRepository;
     private final ImageService imageService;
-    private final NotificationService notificationService;
+    private final ApplicationEventPublisher eventPublisher;
     private final RestTemplate restTemplate;
 
     @Override
@@ -82,8 +83,9 @@ public class PostServiceImpl implements PostService {
 
         Post savedPost = postRepository.save(post);
 
-        // Async fan-out: notify all followers
-        notificationService.notifyFollowers(currentUsername, savedPost.getId());
+        // Publish event – listener fires AFTER_COMMIT so the post row is
+        // guaranteed to be visible in DB before the async fan-out reads it.
+        eventPublisher.publishEvent(new PostCreatedEvent(currentUsername, savedPost.getId()));
 
         return mapToPostResponse(savedPost);
     }

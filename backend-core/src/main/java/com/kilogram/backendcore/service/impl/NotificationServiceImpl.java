@@ -15,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -66,7 +65,6 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    @Async("notificationExecutor")
     @Transactional
     public void notifyFollowers(String authorUsername, String postId) {
         List<String> followerUsernames =
