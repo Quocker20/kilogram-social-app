@@ -26,8 +26,15 @@ apiClient.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      useAuthStore.getState().logout();
-      window.location.replace('/login');
+      const authPages = ['/login', '/register'];
+      const isOnAuthPage = authPages.some((p) =>
+        window.location.pathname.startsWith(p)
+      );
+
+      if (!isOnAuthPage) {
+        useAuthStore.getState().logout();
+        window.location.replace('/login');
+      }
     }
     return Promise.reject(error);
   }
