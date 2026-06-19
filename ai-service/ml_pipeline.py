@@ -15,10 +15,11 @@ model_data = {
 }
 
 def load_data(db_engine):
-    # Fetch user interactions
+    # Fetch user interactions within the last 30 days
     query_interactions = """
     SELECT user_id, post_id, interaction_type 
     FROM user_interactions 
+    WHERE created_at >= NOW() - INTERVAL 30 DAY
     """
     df_interactions = pd.read_sql(query_interactions, db_engine)
     
@@ -56,11 +57,24 @@ def train_model():
         model_data["is_trained"] = False
         return
 
-    # Create User-Item Matrix
-    user_item_matrix = df.pivot(index='user_id', columns='post_id', values='score').fillna(0)
+    # Use Categorical representation to map user_ids and post_ids to indices
+    user_categories = pd.Categorical(df['user_id'])
+    post_categories = pd.Categorical(df['post_id'])
     
-    n_users = user_item_matrix.shape[0]
-    n_items = user_item_matrix.shape[1]
+    user_index = {user_id: idx for idx, user_id in enumerate(user_categories.categories)}
+    post_index = {post_id: idx for idx, post_id in enumerate(post_categories.categories)}
+    
+    # Build sparse COO matrix
+    row = user_categories.codes
+    col = post_categories.codes
+    data = df['score'].values
+    
+    from scipy.sparse import coo_matrix
+    sparse_matrix = coo_matrix((data, (row, col)), shape=(len(user_index), len(post_index)))
+    sparse_matrix_csr = sparse_matrix.tocsr()
+    
+    n_users = sparse_matrix_csr.shape[0]
+    n_items = sparse_matrix_csr.shape[1]
     
     # Determine safe n_components
     n_comp = min(20, min(n_users, n_items) - 1)
@@ -71,14 +85,14 @@ def train_model():
         return
         
     svd = TruncatedSVD(n_components=n_comp, random_state=42)
-    user_factors = svd.fit_transform(user_item_matrix)
+    user_factors = svd.fit_transform(sparse_matrix_csr)
     item_factors = svd.components_
     
     # Update global model data safely
     model_data["user_factors"] = user_factors
     model_data["item_factors"] = item_factors
-    model_data["user_index"] = {user_id: idx for idx, user_id in enumerate(user_item_matrix.index)}
-    model_data["post_index"] = {post_id: idx for idx, post_id in enumerate(user_item_matrix.columns)}
+    model_data["user_index"] = user_index
+    model_data["post_index"] = post_index
     model_data["is_trained"] = True
     
     print(f"Model trained successfully. Users: {n_users}, Posts: {n_items}, Components: {n_comp}")
@@ -118,7 +132,7 @@ def get_recommendations(target_user_id: str, candidates: list, limit: int = 20):
     
     # 2. Calc CF Scores
     cf_scores_scaled = np.zeros(len(candidates))
-    alpha = 0.8 # Default: 80% Trending, 20% Personalize
+    alpha = 0.5 # Default: 50% Trending, 50% Personalize
     
     if model_data["is_trained"] and target_user_id in model_data["user_index"]:
         user_idx = model_data["user_index"][target_user_id]

@@ -27,10 +27,10 @@ async def lifespan(app: FastAPI):
     print("Startup: Running initial ML Training...")
     ml_pipeline.train_model()
     
-    # Start Scheduler
-    scheduler.add_job(ml_pipeline.train_model, 'interval', minutes=60)
+    # Start Scheduler (Daily at 1:00 AM)
+    scheduler.add_job(ml_pipeline.train_model, 'cron', hour=1, minute=0)
     scheduler.start()
-    print("Scheduler started. Training every 60 mins.")
+    print("Scheduler started. Training scheduled daily at 1:00 AM.")
     
     yield
     
